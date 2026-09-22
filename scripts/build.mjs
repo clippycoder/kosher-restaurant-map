@@ -75,13 +75,20 @@ function rateLimiter(minGapMs) {
 const siteLimit = rateLimiter(SITE_DELAY_MS);
 const geoLimit = rateLimiter(NOMINATIM_DELAY_MS);
 
-/** fetch with retry/backoff on 429 and 5xx. */
-async function request(url, { tries = 4, ...init } = {}) {
+/**
+ * fetch with retry/backoff on 429 and 5xx, and a hard per-attempt timeout.
+ *
+ * The timeout matters: Node's fetch has none, so a connection that is accepted
+ * but never answered (the source site runs Wordfence, which throttles
+ * datacenter IPs) would otherwise hang the build until CI kills the job.
+ */
+async function request(url, { tries = 4, timeoutMs = 30_000, ...init } = {}) {
   let lastErr;
   for (let attempt = 1; attempt <= tries; attempt++) {
     try {
       const res = await fetch(url, {
         ...init,
+        signal: AbortSignal.timeout(timeoutMs),
         headers: { 'User-Agent': USER_AGENT, ...(init.headers || {}) },
       });
       if (res.status === 429 || res.status >= 500) {

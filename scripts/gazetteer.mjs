@@ -72,6 +72,7 @@ async function overpass(query) {
       try {
         const res = await fetch(url, {
           method: 'POST',
+          signal: AbortSignal.timeout(240_000),     // Overpass can be slow, not endless
           headers: {
             'User-Agent': UA,                       // Overpass 406s without one
             'Content-Type': 'application/x-www-form-urlencoded',
