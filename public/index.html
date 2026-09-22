@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מפת מסעדות כשרות בישראל</title>
+<meta name="description" content="מפה של מסעדות בהשגחה בישראל, עם סינון לפי עיר, אזור, סוג וכשרות.">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+      integrity="sha256-YU3qCpj/P06tdPBJGPax0bm6Q1wltfwjsho5TR4+TYc="
+      crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+      integrity="sha256-YSWCMtmNZNwqex4CEw1nQhvFub2lmU7vcCKP+XVwwXA="
+      crossorigin="anonymous">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header id="topbar">
+  <button id="filters-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+    <span aria-hidden="true">☰</span> סינון
+  </button>
+  <h1>מסעדות בהשגחה</h1>
+  <output id="result-count" aria-live="polite">טוען…</output>
+</header>
+
+<div id="shell">
+
+  <aside id="sidebar" aria-label="סינון תוצאות">
+    <div id="sidebar-scroll">
+
+      <div class="field">
+        <label for="search">חיפוש חופשי</label>
+        <input type="search" id="search" placeholder="שם מסעדה, רחוב או עיר" autocomplete="off">
+      </div>
+
+      <section class="facet" data-facet="types">
+        <h2>סוג</h2>
+        <div class="options" id="facet-types"></div>
+      </section>
+
+      <section class="facet" data-facet="areas">
+        <h2>אזור</h2>
+        <div class="options" id="facet-areas"></div>
+      </section>
+
+      <section class="facet" data-facet="cities">
+        <div class="facet-head">
+          <h2>עיר</h2>
+          <button type="button" class="clear-facet" data-clear="cities">נקה</button>
+        </div>
+        <input type="search" id="city-search" placeholder="חפש עיר…" autocomplete="off"
+               aria-label="חיפוש עיר">
+        <div class="options scroll" id="facet-cities"></div>
+      </section>
+
+      <section class="facet" data-facet="hechsherim">
+        <div class="facet-head">
+          <h2>כשרות</h2>
+          <button type="button" class="clear-facet" data-clear="hechsherim">נקה</button>
+        </div>
+        <div class="options scroll" id="facet-hechsherim"></div>
+      </section>
+
+      <button type="button" id="reset-all">אפס את כל הסינונים</button>
+
+      <p id="meta"></p>
+    </div>
+  </aside>
+
+  <main id="map-wrap">
+    <div id="map"></div>
+
+    <div id="status" role="status">טוען נתונים…</div>
+
+    <section id="unmapped" hidden>
+      <button type="button" id="unmapped-toggle" aria-expanded="false" aria-controls="unmapped-list">
+        <span id="unmapped-count"></span> ללא מיקום מדויק
+      </button>
+      <ul id="unmapped-list" hidden></ul>
+    </section>
+  </main>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"
+        integrity="sha256-Hk4dIpcqOSb0hZjgyvFOP+cEmDXUKKNE/tT542ZbNQg="
+        crossorigin="anonymous"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

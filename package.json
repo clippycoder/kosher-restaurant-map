@@ -1,0 +1,16 @@
+{
+  "name": "kosher-restaurant-map",
+  "version": "1.0.0",
+  "description": "Map of supervised kosher restaurants in Israel, built from rest.jdn.co.il",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:sample": "node scripts/build.mjs --sample",
+    "verify": "node scripts/verify.mjs",
+    "serve": "node scripts/serve.mjs"
+  }
+}

@@ -1,0 +1,42 @@
+name: Refresh data
+
+on:
+  schedule:
+    # 03:00 UTC daily. Steady-state runs touch only changed records.
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    # The first run geocodes ~641 addresses at 1 req/s; later runs take seconds.
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build dataset
+        run: node scripts/build.mjs
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/geocache.json public/data/restaurants.json
+          if git diff --staged --quiet; then
+            echo "No changes."
+          else
+            git commit -m "data: refresh $(date -u +%Y-%m-%d)"
+            git push
+          fi

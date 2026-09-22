@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+*.log
+
+# local Claude Code permissions, not shared
+.claude/settings.local.json
+.cache/
