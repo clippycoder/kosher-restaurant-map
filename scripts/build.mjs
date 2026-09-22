@@ -599,26 +599,42 @@ async function main() {
     const candidates = addressCandidates(r.address, r.city);
     if (candidates.length) {
       const keyed = candidates.map((c) => ({ ...c, key: `gaz:${r.city}|${c.street}|${c.house}` }));
-      const stale = (c) => geocache[c.key] === undefined || isStaleMiss(geocache[c.key]);
-      const needsFetch = keyed.some(stale);
-      const gaz = needsFetch ? await gazFor(r.city) : null;
+      const known = (c) => geocache[c.key] !== undefined && !isStaleMiss(geocache[c.key]);
 
+      const consider = (entry, best) => {
+        if (!entry || entry.lat === null) return best;
+        if (!plausible(r.city, entry.lat, entry.lon)) return best;
+        const rank = { address: 3, street: 2, city: 1 };
+        if (!best || (rank[entry.precision] || 0) > (rank[best.precision] || 0)) return entry;
+        return best;
+      };
+
+      // Pass 1: answer from cache alone where possible.
       let best = null;
       for (const c of keyed) {
-        let entry = geocache[c.key];
-        if (entry === undefined || (gaz && isStaleMiss(entry))) {
-          const found = gaz ? gazLookup(gaz, c.street, c.house) : null;
-          entry = found
+        if (!known(c)) continue;
+        best = consider(geocache[c.key], best);
+        if (best?.precision === 'address') break;
+      }
+
+      // Pass 2: only load the city's gazetteer when the cache cannot already
+      // give a house-number answer and something is genuinely unknown. Every
+      // candidate is then resolved and cached -- not just up to the first hit --
+      // so later runs (and CI, which starts with an empty .cache/) need no
+      // Overpass calls at all.
+      if (best?.precision !== 'address' && keyed.some((c) => !known(c))) {
+        const gaz = await gazFor(r.city);
+        for (const c of keyed) {
+          if (known(c)) continue;
+          const found = gazLookup(gaz, c.street, c.house);
+          geocache[c.key] = found
             ? { lat: found.lat, lon: found.lon, precision: found.precision,
                 ts: new Date().toISOString() }
             : { lat: null, lon: null, ts: new Date().toISOString() };
-          geocache[c.key] = entry;
+          best = consider(geocache[c.key], best);
         }
-        if (entry.lat === null) continue;
-        if (!plausible(r.city, entry.lat, entry.lon)) continue;
-        if (entry.precision === 'address') { best = entry; break; }   // can't do better
-        if (!best) best = entry;
       }
+
       if (best) {
         gazHit = best;
         gazStats[best.precision]++;

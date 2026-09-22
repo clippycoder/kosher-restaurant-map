@@ -36,7 +36,15 @@ jobs:
           git add data/geocache.json public/data/restaurants.json
           if git diff --staged --quiet; then
             echo "No changes."
-          else
-            git commit -m "data: refresh $(date -u +%Y-%m-%d)"
-            git push
+            exit 0
           fi
+          git commit -m "data: refresh $(date -u +%Y-%m-%d)"
+          # A long build can finish behind main if anything else landed
+          # meanwhile, so rebase onto the remote before pushing.
+          for attempt in 1 2 3; do
+            git pull --rebase --autostash origin main && git push && exit 0
+            echo "push attempt $attempt failed; retrying"
+            sleep 5
+          done
+          echo "could not push refreshed data" >&2
+          exit 1
