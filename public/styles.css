@@ -12,7 +12,7 @@
   /* iOS reports a notch here; without it a fixed header hides under the
      status bar, which is what "cut off at the top" looked like. */
   --safe-top: env(safe-area-inset-top, 0px);
-  --bar-h: 56px;
+  --bar-h: 68px;
   --header-h: calc(var(--bar-h) + var(--safe-top));
   --sidebar-w: 318px;
 }
@@ -307,7 +307,7 @@ button:focus-visible {
 /* ---------- mobile ---------- */
 
 @media (max-width: 760px) {
-  :root { --bar-h: 52px; }
+  :root { --bar-h: 64px; }
 
   #filters-toggle { display: inline-flex; }
   #topbar h1 { font-size: 14.5px; }
@@ -349,12 +349,29 @@ button:focus-visible {
 
 /* ---------- add-restaurant action ---------- */
 
-#add-restaurant {
+.add-cta {
   margin-inline-start: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  flex: 0 0 auto;
+}
+
+.add-prompt {
+  font-size: 11.5px;
+  line-height: 1;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+}
+
+#add-restaurant {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 34px;              /* same rhythm as the filter button */
+  height: 34px;
   padding: 0 14px;
   background: var(--accent);
   color: #fff;
@@ -363,7 +380,6 @@ button:focus-visible {
   font-weight: 600;
   border-radius: 8px;
   white-space: nowrap;
-  flex: 0 0 auto;
 
   /* The gleam is a pseudo-element sweeping across; clip it to the button. */
   position: relative;
@@ -372,33 +388,36 @@ button:focus-visible {
 }
 #add-restaurant:hover { background: var(--accent-dark); }
 #add-restaurant:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-#add-restaurant svg { width: 15px; height: 15px; fill: none; flex: 0 0 auto; }
+#add-restaurant svg { width: 15px; height: 15px; fill: none; flex: 0 0 auto; position: relative; z-index: 1; }
 #add-restaurant span { position: relative; z-index: 1; }
 
-/* A highlight crosses the button every few seconds so the action keeps
-   announcing itself without moving or resizing anything. */
+/* A highlight crosses the button every 30 seconds so the action keeps
+   announcing itself without moving or resizing anything.
+   Driven by `transform`, not by a logical inset: Safari does not reliably
+   interpolate inset-inline-start in keyframes, which left this invisible. */
 #add-restaurant::after {
   content: "";
   position: absolute;
   top: -60%;
   bottom: -60%;
-  width: 38px;
+  left: 0;
+  width: 54px;
   background: linear-gradient(90deg,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, .55) 50%,
+    rgba(255, 255, 255, .75) 50%,
     rgba(255, 255, 255, 0) 100%);
-  transform: skewX(-18deg);
+  transform: translateX(-150%) skewX(-18deg);
   animation: gleam 30s linear infinite;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Most of the cycle is spent off-stage, so it reads as an occasional glint
-   rather than a continuously animating element. */
+/* The sweep itself lasts ~1s; the rest of the cycle it waits off-stage, so it
+   reads as an occasional glint rather than a moving element. */
 @keyframes gleam {
-  0%    { inset-inline-start: -45px; }
-  2.3%  { inset-inline-start: 105%; }
-  100%  { inset-inline-start: 105%; }
+  0%    { transform: translateX(-150%) skewX(-18deg); }
+  3.4%  { transform: translateX(460%)  skewX(-18deg); }
+  100%  { transform: translateX(460%)  skewX(-18deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
