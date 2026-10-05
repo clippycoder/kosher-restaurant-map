@@ -76,27 +76,20 @@ browser repeating the work into its own `localStorage`.
 
 ## Adding a restaurant
 
-The "הוספת מסעדה" button in the header points at
-[the בהשגחה form](https://rest.jdn.co.il/add-res-2/). They own the data, and
-anything they accept appears here on the next daily refresh.
-
-Their form ignores URL parameters — injecting `?resname=…` changes nothing in the
-response — so the panel offers a copy-to-clipboard template matching its fields
-exactly rather than a pre-filled deep link.
+The header carries a single prominent link straight to
+[the בהשגחה form](https://rest.jdn.co.il/add-res-2/) — no interstitial. They own
+the data, and anything they accept appears here on the next daily refresh.
 
 That is the only contribution route, by design. **This project collects nothing
 from visitors**: no report form, no issue links, no contact address, no analytics.
-Corrections to a restaurant's details belong upstream.
 
-A deliberate consequence: there is no way for a visitor to flag a misplaced pin,
-even though pin positioning happens in this repo rather than upstream. Those are
-corrected by hand in `data/overrides.json`.
-
-The source site has no update route of its own either, which was verified against
-the live site: 7 pages in total; a restaurant page's only internal link is the add
-form; no edit, report or contact page; no `mailto:`, `tel:` or WhatsApp link
-anywhere; and the form itself is add-only, with no field referencing an existing
-listing.
+Two deliberate consequences. Corrections to a restaurant's details have to go
+through בהשגחה, and their form is add-only — verified against the live site,
+which has 7 pages in total, no edit/report/contact page, no `mailto:`, `tel:` or
+WhatsApp link anywhere, and whose only internal link from a restaurant page is
+the add form itself. And a visitor cannot flag a misplaced pin, even though pin
+positioning happens in this repo; those are corrected by hand in
+`data/overrides.json`.
 
 Writing to `rest.jdn.co.il` programmatically is not attempted: their REST API
 returns 401 to anonymous writes, as it should, and posting into their editorial

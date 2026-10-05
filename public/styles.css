@@ -323,120 +323,49 @@ button:focus-visible {
   #sidebar { transition: none; }
 }
 
-/* ---------- contribute dialog ---------- */
+/* ---------- add-restaurant call to action ---------- */
 
-#contribute-toggle {
-  background: rgba(255, 255, 255, .16);
-  color: #fff;
-  border: 0;
-  border-radius: 6px;
-  padding: 7px 11px;
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  white-space: nowrap;
-  margin-inline-start: 10px;
-}
-#contribute-toggle:hover { background: rgba(255, 255, 255, .26); }
-
-#contribute {
-  border: 0;
-  border-radius: 10px;
-  padding: 22px;
-  max-width: 460px;
-  width: calc(100% - 32px);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, .3);
-  color: var(--text);
-  text-align: start;
-}
-#contribute::backdrop { background: rgba(0, 0, 0, .45); }
-
-#contribute h2 { margin: 0 0 4px; font-size: 18px; color: var(--accent); }
-#contribute section { margin-top: 18px; }
-#contribute h3 { margin: 0 0 6px; font-size: 14px; }
-#contribute p { margin: 0 0 10px; font-size: 13px; line-height: 1.65; color: #44444c; }
-
-#contribute .cta {
-  display: inline-block;
-  background: var(--accent);
-  color: #fff;
-  text-decoration: none;
-  padding: 9px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-}
-#contribute .cta:hover { filter: brightness(1.08); }
-#contribute .cta.secondary {
+#add-restaurant {
+  margin-inline-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   background: #fff;
   color: var(--accent);
-  border: 1px solid var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 9px 16px;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .22);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+#add-restaurant:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .3);
+}
+#add-restaurant:active { transform: none; }
+#add-restaurant:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+#add-restaurant svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  flex: 0 0 auto;
 }
 
-#contribute-close {
-  margin-top: 20px;
-  width: 100%;
-  padding: 9px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: #fff;
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-}
-#contribute-close:hover { background: var(--panel); }
-
+/* The count no longer needs to push the CTA over. */
+#result-count { margin-inline-start: 0; }
 
 @media (max-width: 760px) {
-  #contribute-toggle { font-size: 12px; padding: 6px 9px; margin-inline-start: 6px; }
+  /* Keep the label: an unlabelled + would not read as "add a restaurant". */
+  #add-restaurant { font-size: 13px; padding: 7px 12px; gap: 5px; }
+  #add-restaurant svg { width: 15px; height: 15px; }
   #topbar #result-count { display: none; }
 }
 
-#contribute .subject {
-  margin: 0 0 10px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  background: var(--accent-weak);
-  padding: 6px 9px;
-  border-radius: 5px;
+@media (prefers-reduced-motion: reduce) {
+  #add-restaurant { transition: none; }
+  #add-restaurant:hover { transform: none; }
 }
-#contribute .subject[hidden] { display: none; }
-
-#contribute .lede { font-size: 13px; line-height: 1.65; color: #44444c; margin: 0 0 4px; }
-
-#contribute .path {
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-
-#contribute .hint { font-size: 12px; color: var(--muted); margin: 0 0 7px; }
-
-#contribute textarea {
-  width: 100%;
-  font: inherit;
-  font-size: 12px;
-  line-height: 1.6;
-  padding: 9px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  resize: vertical;
-  background: #fff;
-  color: var(--text);
-}
-
-#contribute .row { display: flex; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
-#contribute .row .cta { flex: 1 1 auto; text-align: center; }
-
-.copy-status {
-  display: inline-block;
-  margin-top: 7px;
-  font-size: 12px;
-  color: var(--accent);
-  min-height: 1em;
-}
-
-#contribute .fineprint { font-size: 11px; color: var(--muted); margin: 8px 0 0; }
-
-#contribute button.cta { cursor: pointer; }

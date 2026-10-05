@@ -27,7 +27,14 @@
   </button>
   <h1>מסעדות בהשגחה</h1>
   <output id="result-count" aria-live="polite">טוען…</output>
-  <button id="contribute-toggle" type="button">הוספת מסעדה</button>
+  <a id="add-restaurant" href="https://rest.jdn.co.il/add-res-2/"
+     target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4"
+            stroke-linecap="round"/>
+    </svg>
+    <span>הוספת מסעדה</span>
+  </a>
 </header>
 
 <div id="shell">
@@ -88,32 +95,6 @@
   </main>
 
 </div>
-
-<dialog id="contribute">
-  <h2>הוספת מסעדה</h2>
-
-  <p class="lede">
-    רשימת המסעדות מגיעה במלואה מאתר <strong>בהשגחה</strong>, והמפה מתעדכנת ממנו
-    אוטומטית אחת ליום — כך שמסעדה שתתווסף אצלם תופיע כאן מעצמה.
-  </p>
-
-  <section class="path">
-    <p>
-      הטופס שלהם לא תומך במילוי אוטומטי, אז הנה תבנית מוכנה בדיוק לפי השדות
-      שלו. העתיקו, פתחו את הטופס והדביקו.
-    </p>
-    <textarea id="add-text" rows="9" spellcheck="false" aria-label="תבנית להוספת מסעדה"></textarea>
-    <div class="row">
-      <button type="button" id="copy-add" class="cta secondary">העתקת התבנית</button>
-      <a class="cta" id="jdn-add" href="https://rest.jdn.co.il/add-res-2/"
-         target="_blank" rel="noopener noreferrer">פתיחת טופס ההוספה</a>
-    </div>
-    <span id="copy-add-status" class="copy-status" role="status" aria-live="polite"></span>
-  </section>
-
-
-  <button id="contribute-close" type="button">סגירה</button>
-</dialog>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
