@@ -74,6 +74,34 @@ every geocode result is cached in `data/geocache.json` and committed, so an addr
 is looked up once and the answer is shared by every visitor — rather than every
 browser repeating the work into its own `localStorage`.
 
+## Adding a restaurant
+
+The "הוספת מסעדה" button in the header points at
+[the בהשגחה form](https://rest.jdn.co.il/add-res-2/). They own the data, and
+anything they accept appears here on the next daily refresh.
+
+Their form ignores URL parameters — injecting `?resname=…` changes nothing in the
+response — so the panel offers a copy-to-clipboard template matching its fields
+exactly rather than a pre-filled deep link.
+
+That is the only contribution route, by design. **This project collects nothing
+from visitors**: no report form, no issue links, no contact address, no analytics.
+Corrections to a restaurant's details belong upstream.
+
+A deliberate consequence: there is no way for a visitor to flag a misplaced pin,
+even though pin positioning happens in this repo rather than upstream. Those are
+corrected by hand in `data/overrides.json`.
+
+The source site has no update route of its own either, which was verified against
+the live site: 7 pages in total; a restaurant page's only internal link is the add
+form; no edit, report or contact page; no `mailto:`, `tel:` or WhatsApp link
+anywhere; and the form itself is add-only, with no field referencing an existing
+listing.
+
+Writing to `rest.jdn.co.il` programmatically is not attempted: their REST API
+returns 401 to anonymous writes, as it should, and posting into their editorial
+queue would be an unauthorised write to someone else's system.
+
 ## Layout
 
 | Path | Purpose |

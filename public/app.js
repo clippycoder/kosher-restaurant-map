@@ -8,6 +8,10 @@
   'use strict';
 
   const DATA_URL = 'data/restaurants.json';
+  // The source site owns the data and has an open form for adding a restaurant,
+  // so that is the only contribution route the map offers. It has no update form
+  // and no contact address, and this project collects nothing from visitors.
+  const JDN_ADD_URL = 'https://rest.jdn.co.il/add-res-2/';
   const ISRAEL_CENTER = [31.6, 34.98];
 
   // Facet key -> the record property it filters on.
@@ -87,6 +91,29 @@
   // -------------------------------------------------------------------------
   // rendering: markers
   // -------------------------------------------------------------------------
+
+  /** Blank template matching the fields the בהשגחה add form asks for. */
+  const ADD_TEMPLATE = [
+    'שם המסעדה:',
+    'תקציר מידע על המסעדה:',
+    'תיאור המסעדה:',
+    'כתובת:',
+    'אזור בארץ:',
+    'טל׳ להזמנות:',
+    'וואטסאפ להזמנות:',
+    'בשרי / חלבי / פרווה:',
+    'כשרות:',
+    'טל׳ בעלים:',
+    'טל׳ משגיח:',
+  ].join('\n');
+
+  /** Opens the panel. */
+  function openContribute() {
+    $('add-text').value = ADD_TEMPLATE;
+    $('jdn-add').href = JDN_ADD_URL;
+    for (const node of document.querySelectorAll('.copy-status')) node.textContent = '';
+    $('contribute').showModal();
+  }
 
   function popupFor(r) {
     const dl = el('dl');
@@ -341,6 +368,30 @@
       const open = $('sidebar').classList.toggle('open');
       toggle.setAttribute('aria-expanded', String(open));
     });
+
+    const dialog = $('contribute');
+    $('contribute-toggle').addEventListener('click', () => openContribute());
+    $('contribute-close').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+
+    const wireCopy = (btnId, fieldId, statusId) => {
+      $(btnId).addEventListener('click', async () => {
+        const field = $(fieldId);
+        const status = $(statusId);
+        try {
+          await navigator.clipboard.writeText(field.value);
+          status.textContent = 'הועתק';
+        } catch {
+          // Clipboard access is refused on insecure origins and in some
+          // browsers; selecting the text leaves one keystroke to go.
+          field.focus();
+          field.select();
+          status.textContent = 'בחרו והעתיקו ידנית';
+        }
+        setTimeout(() => { status.textContent = ''; }, 3000);
+      });
+    };
+    wireCopy('copy-add', 'add-text', 'copy-add-status');
 
     const ut = $('unmapped-toggle');
     ut.addEventListener('click', () => {
