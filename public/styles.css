@@ -1,13 +1,20 @@
 :root {
   --bg: #ffffff;
-  --panel: #f7f7f8;
-  --border: #d8d8dd;
-  --text: #1c1c1f;
+  --panel: #f6f6f8;
+  --border: #e2e2e7;
+  --border-strong: #cfcfd6;
+  --text: #17171a;
   --muted: #6a6a73;
   --accent: #b3261e;
+  --accent-dark: #8e1e17;
   --accent-weak: #fdecea;
-  --topbar-h: 52px;
-  --sidebar-w: 310px;
+
+  /* iOS reports a notch here; without it a fixed header hides under the
+     status bar, which is what "cut off at the top" looked like. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --bar-h: 56px;
+  --header-h: calc(var(--bar-h) + var(--safe-top));
+  --sidebar-w: 318px;
 }
 
 * { box-sizing: border-box; }
@@ -22,49 +29,60 @@ html, body {
 
 /* ---------- top bar ---------- */
 
+/* A working toolbar, not a banner: light surface, dark text, and the accent
+   reserved for the one action worth taking. */
 #topbar {
-  height: var(--topbar-h);
+  height: var(--header-h);
+  padding: var(--safe-top) 14px 0;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 14px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
   position: relative;
   z-index: 1200;
 }
 
+.brand { display: flex; align-items: baseline; gap: 9px; min-width: 0; }
+
 #topbar h1 {
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -.01em;
   margin: 0;
+  color: var(--text);
   white-space: nowrap;
 }
 
 #result-count {
-  margin-inline-start: auto;
-  font-size: 13px;
-  opacity: .95;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 #filters-toggle {
-  display: none;
-  background: rgba(255, 255, 255, .16);
-  color: #fff;
-  border: 0;
-  border-radius: 6px;
-  padding: 7px 11px;
+  display: none;            /* only meaningful where the sidebar is a drawer */
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
   font: inherit;
-  font-size: 14px;
+  font-size: 13.5px;
   cursor: pointer;
 }
+#filters-toggle:hover { background: var(--panel); }
+#filters-toggle svg { width: 16px; height: 16px; fill: none; flex: 0 0 auto; }
 
 /* ---------- layout ---------- */
 
 #shell {
   display: flex;
-  height: calc(100% - var(--topbar-h));
+  height: calc(100% - var(--header-h));
 }
 
 #sidebar {
@@ -289,14 +307,20 @@ button:focus-visible {
 /* ---------- mobile ---------- */
 
 @media (max-width: 760px) {
-  :root { --topbar-h: 50px; }
+  :root { --bar-h: 52px; }
 
-  #filters-toggle { display: inline-block; }
-  #topbar h1 { font-size: 15px; }
+  #filters-toggle { display: inline-flex; }
+  #topbar h1 { font-size: 14.5px; }
+  /* Not enough width for filter + title + count + action; the count is the
+     least important of the four and the sidebar repeats the information. */
+  #result-count { display: none; }
+  #topbar { gap: 9px; padding-inline: 10px; }
+  #add-restaurant { padding: 0 11px; font-size: 13px; }
+  #filters-toggle { padding: 0 10px; }
 
   #sidebar {
     position: fixed;
-    inset-block: var(--topbar-h) 0;
+    inset-block: var(--header-h) 0;
     inset-inline-start: 0;
     width: min(88vw, 340px);
     flex: none;
@@ -323,49 +347,60 @@ button:focus-visible {
   #sidebar { transition: none; }
 }
 
-/* ---------- add-restaurant call to action ---------- */
+/* ---------- add-restaurant action ---------- */
 
 #add-restaurant {
   margin-inline-start: auto;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: #fff;
-  color: var(--accent);
+  gap: 6px;
+  height: 34px;              /* same rhythm as the filter button */
+  padding: 0 14px;
+  background: var(--accent);
+  color: #fff;
   text-decoration: none;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 9px 16px;
-  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 8px;
   white-space: nowrap;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, .22);
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-#add-restaurant:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 12px rgba(0, 0, 0, .3);
-}
-#add-restaurant:active { transform: none; }
-#add-restaurant:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
-
-#add-restaurant svg {
-  width: 17px;
-  height: 17px;
-  fill: none;
   flex: 0 0 auto;
+
+  /* The gleam is a pseudo-element sweeping across; clip it to the button. */
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+#add-restaurant:hover { background: var(--accent-dark); }
+#add-restaurant:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#add-restaurant svg { width: 15px; height: 15px; fill: none; flex: 0 0 auto; }
+#add-restaurant span { position: relative; z-index: 1; }
+
+/* A highlight crosses the button every few seconds so the action keeps
+   announcing itself without moving or resizing anything. */
+#add-restaurant::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  bottom: -60%;
+  width: 38px;
+  background: linear-gradient(90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, .55) 50%,
+    rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-18deg);
+  animation: gleam 30s linear infinite;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* The count no longer needs to push the CTA over. */
-#result-count { margin-inline-start: 0; }
-
-@media (max-width: 760px) {
-  /* Keep the label: an unlabelled + would not read as "add a restaurant". */
-  #add-restaurant { font-size: 13px; padding: 7px 12px; gap: 5px; }
-  #add-restaurant svg { width: 15px; height: 15px; }
-  #topbar #result-count { display: none; }
+/* Most of the cycle is spent off-stage, so it reads as an occasional glint
+   rather than a continuously animating element. */
+@keyframes gleam {
+  0%    { inset-inline-start: -45px; }
+  2.3%  { inset-inline-start: 105%; }
+  100%  { inset-inline-start: 105%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #add-restaurant { transition: none; }
-  #add-restaurant:hover { transform: none; }
+  #add-restaurant::after { animation: none; opacity: 0; }
 }
