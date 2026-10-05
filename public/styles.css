@@ -362,7 +362,9 @@ button:focus-visible {
   font-size: 11.5px;
   line-height: 1;
   color: var(--muted);
-  text-align: center;
+  /* Physical left: the group sits at the left edge of the bar, so the question
+     lines up with the button's left edge rather than floating centred over it. */
+  text-align: left;
   white-space: nowrap;
 }
 
