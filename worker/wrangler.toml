@@ -1,0 +1,27 @@
+name = "kosher-map-submissions"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "kosher-map-submissions"
+# Created with `wrangler d1 create kosher-map-submissions`.
+database_id = "dc710b11-7f7c-4671-88ee-715a15e22476"
+migrations_dir = "migrations"
+
+[vars]
+ALLOWED_ORIGINS = "https://clippycoder.github.io,http://localhost:8080"
+# Where captcha tokens may have been solved (siteverify's `hostname`). Never
+# localhost here; local development overrides this in .dev.vars.
+TURNSTILE_HOSTNAMES = "clippycoder.github.io"
+# Checked for duplicates of each new submission.
+DATASET_URL = "https://clippycoder.github.io/kosher-restaurant-map/data/restaurants.json"
+
+# Nightly purge of rate-limit hashes older than 48 hours.
+[triggers]
+crons = ["17 4 * * *"]
+
+# Secrets (wrangler secret put <NAME>; locally, in .dev.vars):
+#   ADMIN_TOKEN       bearer token for /api/admin/*
+#   TURNSTILE_SECRET  Cloudflare Turnstile secret key
+#   RATE_SALT         random string mixed into the rate-limit hash

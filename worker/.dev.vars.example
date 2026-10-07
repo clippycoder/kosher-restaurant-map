@@ -1,0 +1,7 @@
+# Copy to .dev.vars for `wrangler dev`. These are Cloudflare's published
+# Turnstile test keys: the secret below accepts any token.
+ADMIN_TOKEN=dev-admin-token
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+RATE_SALT=dev-salt
+# The hostname Cloudflare's test keys report.
+TURNSTILE_HOSTNAMES=example.com

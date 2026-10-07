@@ -5,3 +5,7 @@ node_modules/
 # local Claude Code permissions, not shared
 .claude/settings.local.json
 .cache/
+
+# worker: local secrets and local D1 state
+worker/.dev.vars
+worker/.wrangler/
