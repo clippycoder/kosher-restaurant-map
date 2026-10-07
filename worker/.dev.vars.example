@@ -5,3 +5,5 @@ TURNSTILE_SECRET=1x0000000000000000000000000000000AA
 RATE_SALT=dev-salt
 # The hostname Cloudflare's test keys report.
 TURNSTILE_HOSTNAMES=example.com
+# Local preview (scripts/serve.mjs); production allows only the GitHub Pages site.
+ALLOWED_ORIGINS=https://clippycoder.github.io,http://localhost:8080

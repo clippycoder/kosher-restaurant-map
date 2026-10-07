@@ -10,7 +10,7 @@ database_id = "dc710b11-7f7c-4671-88ee-715a15e22476"
 migrations_dir = "migrations"
 
 [vars]
-ALLOWED_ORIGINS = "https://clippycoder.github.io,http://localhost:8080"
+ALLOWED_ORIGINS = "https://clippycoder.github.io"
 # Where captcha tokens may have been solved (siteverify's `hostname`). Never
 # localhost here; local development overrides this in .dev.vars.
 TURNSTILE_HOSTNAMES = "clippycoder.github.io"
