@@ -55,6 +55,14 @@ Three things make the matching work, and all three were necessary:
   gazetteer pick the one it recognises.
 - **Fuzzy street matching**, because the two datasets disagree on spellings
   (`לואיס בריינדס` vs `לואיס ברנדייס`).
+- **City centres are settlements only** (Nominatim `featureType=settlement`,
+  countries `il,ps`). A free-text search for `ים המלח, ישראל` returns a road of
+  that name in Jerusalem, and that road became the "city's" centre -- which the
+  distance guard, measuring from the same point, could not object to. The same
+  flaw had 13 towns' centres 6-107 km off. Towns beyond the Green Line are
+  filed under `ps` in OSM, so `il` alone hid them; OSM's single-yod spellings
+  (קרית) are tried too. A city field that isn't a town at all (ים המלח) is
+  anchored by a place named in its listings' addresses (עין בוקק).
 - **A 25 km distance guard** from the city centre on every result. Without it
   Nominatim places a Jerusalem restaurant on a street named *ירושלים* in Sderot —
   the same class of error that made the original version unusable.
@@ -74,26 +82,26 @@ every geocode result is cached in `data/geocache.json` and committed, so an addr
 is looked up once and the answer is shared by every visitor — rather than every
 browser repeating the work into its own `localStorage`.
 
-## Adding a restaurant
+## Adding and correcting restaurants
 
-The header carries a single prominent link straight to
-[the בהשגחה form](https://rest.jdn.co.il/add-res-2/) — no interstitial. They own
-the data, and anything they accept appears here on the next daily refresh.
+The header button opens our own form, `public/add.html`. Submissions go to our
+own database (`worker/`, a Cloudflare Worker + D1), never to rest.jdn.co.il;
+see `worker/README.md` for screening, edits of jdn listings, and moderation.
 
-That is the only contribution route, by design. **This project collects nothing
-from visitors**: no report form, no issue links, no contact address, no analytics.
+- **Fields** come from `public/forms/fields.js`, which the page imports and the
+  worker bundles, so the form and the server apply identical checks. Invalid
+  values (e.g. a malformed phone) are shown inline and block the submit.
+- **Address suggestions** come from [Photon](https://photon.komoot.io) (free,
+  no key, OpenStreetMap data). Picking one fills the city -- mapped onto the
+  map's own spelling -- and stores the coordinates, so the pin needs no geocoding.
+  Nominatim forbids autocomplete; Google's needs a billing account.
+- **"Did you mean…?"** warns while the name is typed if the place is already on
+  the map, using the same matching the server uses to hold duplicates.
+- The advanced section links to [בהשגחה's own form](https://rest.jdn.co.il/add-res-2/),
+  noting that their submissions wait for their approval.
 
-Two deliberate consequences. Corrections to a restaurant's details have to go
-through בהשגחה, and their form is add-only — verified against the live site,
-which has 7 pages in total, no edit/report/contact page, no `mailto:`, `tel:` or
-WhatsApp link anywhere, and whose only internal link from a restaurant page is
-the add form itself. And a visitor cannot flag a misplaced pin, even though pin
-positioning happens in this repo; those are corrected by hand in
-`data/overrides.json`.
-
-Writing to `rest.jdn.co.il` programmatically is not attempted: their REST API
-returns 401 to anonymous writes, as it should, and posting into their editorial
-queue would be an unauthorised write to someone else's system.
+The form states on the page what it stores: the submitted details, private
+phones visible only to the moderator, and a one-way hash of the IP kept 30 days.
 
 ## Layout
 
@@ -103,6 +111,8 @@ queue would be an unauthorised write to someone else's system.
 | `scripts/gazetteer.mjs` | OSM/Overpass address gazetteer and the street matcher. |
 | `scripts/verify.mjs` | Checks the built dataset against the live API. |
 | `scripts/serve.mjs` | Static server for local preview. |
+| `worker/` | Community submissions API (Cloudflare Worker + D1). See `worker/README.md`. |
+| `public/add.html`, `public/forms/` | The add form: field definitions shared with the worker, Photon address suggestions, duplicate matching. |
 | `.cache/gazetteer/` | Downloaded OSM address data. Gitignored, safe to delete. |
 | `public/` | The deployed site. This directory is the Pages root. |
 | `public/data/restaurants.json` | **Generated.** The only file the browser fetches. |
