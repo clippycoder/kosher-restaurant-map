@@ -273,22 +273,34 @@ function isStaleMiss(entry) {
   return !Number.isFinite(age) || age > MISS_RETRY_DAYS;
 }
 
-async function geocode(query, cache, overrides, stats) {
+/**
+ * `settlement: true` restricts the search to cities, towns and villages
+ * (Nominatim's featureType=settlement). Free text answers "ים המלח, ישראל"
+ * with a road of that name in Jerusalem, which then became that "city's"
+ * centre -- and the distance guard, measuring from the same wrong point, could
+ * not object. Settlement answers are cached apart, under `place:`.
+ */
+async function geocode(query, cache, overrides, stats, { settlement = false } = {}) {
   if (!query) return null;
+  const key = settlement ? `place:${query}` : query;
 
-  if (overrides[query]) {
+  if (overrides[key]) {
     stats.override++;
-    const { lat, lon } = overrides[query];
+    const { lat, lon } = overrides[key];
     return { lat: Number(lat), lon: Number(lon) };
   }
 
-  const cached = cache[query];
+  const cached = cache[key];
   if (cached && !isStaleMiss(cached)) {
     stats.cached++;
     return cached.lat === null ? null : { lat: cached.lat, lon: cached.lon };
   }
 
-  const url = `${NOMINATIM}?format=json&limit=1&countrycodes=il&q=${encodeURIComponent(query)}`;
+  // OSM files towns beyond the Green Line (מעלה אדומים, ביתר עילית, אפרת...)
+  // under `ps`; with `il` alone they are invisible and a same-named street
+  // inside the Green Line wins instead.
+  const url = `${NOMINATIM}?format=json&limit=1&countrycodes=il,ps` +
+    `${settlement ? '&featureType=settlement' : ''}&q=${encodeURIComponent(query)}`;
   let result = null;
   try {
     const res = await geoLimit(() => request(url, { tries: 3 }));
@@ -302,7 +314,7 @@ async function geocode(query, cache, overrides, stats) {
     return cached && cached.lat !== null ? { lat: cached.lat, lon: cached.lon } : null;
   }
 
-  cache[query] = result
+  cache[key] = result
     ? { lat: result.lat, lon: result.lon, ts: new Date().toISOString() }
     : { lat: null, lon: null, ts: new Date().toISOString() };
 
@@ -547,12 +559,55 @@ async function main() {
   const geoStats = { cached: 0, hit: 0, miss: 0, error: 0, override: 0, skipped: 0 };
   const gazStats = { address: 0, street: 0, cities: 0, rejected: 0 };
 
-  // City centres first: they anchor the distance check and drive the radius
-  // fallback when a town has no administrative boundary in OSM.
+  // City centres first: they anchor the distance check, drive the radius
+  // fallback when a town has no administrative boundary in OSM, and are the
+  // last-resort pin. Settlements only (see geocode). When the city field isn't
+  // a settlement at all -- "ים המלח" is a region -- the place names in its
+  // listings' addresses are tried instead ("..., ים המלח, עין בוקק").
   const centres = new Map();
+  // The bare name, not "<name>, ישראל": OSM's records for towns beyond the
+  // Green Line don't say ישראל. Also tried in OSM's usual single-yod spelling
+  // (the data says קריית מלאכי, OSM קרית מלאכי).
+  const town = async (name) => {
+    for (const n of new Set([name, name.replace(/קריית/g, 'קרית')])) {
+      const c = await geocode(n, geocache, overrides, geoStats, { settlement: true });
+      if (c) return c;
+    }
+    return null;
+  };
   for (const city of new Set(records.map((r) => r.city).filter(Boolean))) {
-    const c = await geocode(`${city}, ישראל`, geocache, overrides, geoStats);
-    if (c) centres.set(city, [c.lat, c.lon]);
+    let c = await town(city);
+    let via = city;
+    if (!c) {
+      const names = new Set();
+      for (const r of records.filter((x) => x.city === city)) {
+        for (const seg of normalizePart(r.address).split(',').map((x) => x.trim())) {
+          if (seg && seg !== 'ישראל' && !/\d/.test(seg) && yodKey(seg) !== yodKey(city)) names.add(seg);
+        }
+      }
+      for (const name of [...names].slice(0, 4)) {
+        c = await town(name);
+        if (c) { via = name; break; }
+      }
+    }
+    if (!c) {
+      console.warn(`  ! no settlement found for city "${city}"; its pins are not distance-checked`);
+      continue;
+    }
+    centres.set(city, [c.lat, c.lon]);
+
+    // Report centres that the old free-text lookup had put somewhere else.
+    const old = geocache[`${city}, ישראל`];
+    if (old?.lat != null) {
+      const km = distanceKm([old.lat, old.lon], [c.lat, c.lon]);
+      if (km > 5) {
+        console.warn(`  ! centre of "${city}" corrected by ${km.toFixed(0)} km` +
+          `${via !== city ? ` (located via "${via}")` : ''}`);
+        // Gazetteer answers judged against the wrong centre are suspect.
+        for (const k of Object.keys(geocache)) if (k.startsWith(`gaz:${city}|`)) delete geocache[k];
+      }
+      delete geocache[`${city}, ישראל`];
+    }
   }
 
   // How far from the city centre a pin may sit before we distrust it. Generous
@@ -648,7 +703,12 @@ async function main() {
     } else {
       let fallback = gazHit ?? null;   // gazetteer street-level, if any
       for (const variant of geoVariants(r.address, r.city)) {
-        const coords = await geocode(variant.q, geocache, overrides, geoStats);
+        // The last resort is the settlement centre found above -- never a
+        // free-text search for the city name, which can land on a street.
+        const centre = centres.get(r.city);
+        const coords = variant.precision === 'city'
+          ? (centre ? { lat: centre[0], lon: centre[1] } : null)
+          : await geocode(variant.q, geocache, overrides, geoStats);
         if (!coords) continue;
         if (variant.precision !== 'city' && !plausible(r.city, coords.lat, coords.lon)) {
           gazStats.rejected++;   // right street name, wrong town

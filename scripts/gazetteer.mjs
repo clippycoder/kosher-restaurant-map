@@ -150,21 +150,30 @@ export async function getGazetteer(city, centre) {
   await mkdir(CACHE, { recursive: true });
   const file = path.join(CACHE, `${slug(city)}.json`);
   if (existsSync(file)) {
-    try { return JSON.parse(await readFile(file, 'utf8')); } catch { /* refetch */ }
+    try {
+      const g = JSON.parse(await readFile(file, 'utf8'));
+      // A radius-built gazetteer is only as good as the centre it was drawn
+      // around. "ים המלח" was once drawn around a Jerusalem road of that name.
+      const moved = g.via === 'radius' && centre &&
+        (!g.centre || Math.hypot(g.centre[0] - centre[0], g.centre[1] - centre[1]) > 0.02);
+      if (!moved) return g;
+    } catch { /* refetch */ }
   }
 
   let data;
+  let via = 'name';
   try {
     data = await overpass(byName(city));
     if (!data.elements?.length && centre) {
       data = await overpass(byRadius(centre[0], centre[1], 9000));
+      via = 'radius';
     }
   } catch (err) {
     console.warn(`    ! gazetteer fetch failed for ${city}: ${err.message}`);
     return { houses: {}, streets: {} };
   }
 
-  const g = compact(data.elements || []);
+  const g = { ...compact(data.elements || []), via, ...(via === 'radius' ? { centre } : {}) };
   await writeFile(file, JSON.stringify(g), 'utf8');
   return g;
 }
