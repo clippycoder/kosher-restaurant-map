@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 /**
- * Moderation from the terminal.
+ * Moderation from the terminal:
  *
- *   SUBMISSIONS_API=https://<worker>.workers.dev ADMIN_TOKEN=... node scripts/moderate.mjs <command>
+ *   node scripts/moderate.mjs <command>
+ *
+ * Talks to the live worker, with the admin token from the macOS Keychain
+ * (service "kosher-map-admin-token"). SUBMISSIONS_API and ADMIN_TOKEN override
+ * them, e.g. SUBMISSIONS_API=http://localhost:8787 against `wrangler dev`.
  *
  *   list [held|published|rejected|all]     default: held
  *   show <id>
@@ -28,23 +32,48 @@
 
 import { execFileSync } from 'node:child_process';
 
-const API = (process.env.SUBMISSIONS_API || 'http://localhost:8787').replace(/\/$/, '');
-const TOKEN = process.env.ADMIN_TOKEN;
+const LIVE_API = 'https://kosher-map-submissions.clippycoder.workers.dev';
+const API = (process.env.SUBMISSIONS_API || LIVE_API).replace(/\/$/, '');
+
+/** The admin token: ADMIN_TOKEN if set, else the one kept in the macOS Keychain. */
+function adminToken() {
+  if (process.env.ADMIN_TOKEN) return process.env.ADMIN_TOKEN;
+  try {
+    return execFileSync('security',
+      ['find-generic-password', '-a', 'kosher-map', '-s', 'kosher-map-admin-token', '-w'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return '';
+  }
+}
 const REPO = process.env.MAP_REPO || 'clippycoder/kosher-restaurant-map';
 
+let TOKEN = null;
 async function api(method, path, body) {
+  TOKEN ??= adminToken();
   if (!TOKEN) {
-    console.error('ADMIN_TOKEN is not set');
+    console.error('No admin token: not in the Keychain (service "kosher-map-admin-token") and ADMIN_TOKEN is not set.');
     process.exit(2);
   }
-  const res = await fetch(`${API}/api/admin/${path}`, {
+  let res;
+  try {
+    res = await fetch(`${API}/api/admin/${path}`, {
     method,
     headers: {
       Authorization: `Bearer ${TOKEN}`,
       ...(body ? { 'content-type': 'application/json' } : {}),
     },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (err) {
+    const why = err.cause?.code === 'ENOTFOUND' ? 'that address does not exist' : (err.cause?.message || err.message);
+    console.error(`Can't reach the server at ${API} (${why}).`);
+    if (process.env.SUBMISSIONS_API && API !== LIVE_API) {
+      console.error(`SUBMISSIONS_API is set in this terminal; the live server is ${LIVE_API}.\n` +
+        'Run `unset SUBMISSIONS_API` (or open a new terminal) to use it.');
+    }
+    process.exit(1);
+  }
   const out = await res.json().catch(() => ({}));
   if (!res.ok) {
     console.error(`${res.status} ${JSON.stringify(out)}`);
