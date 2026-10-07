@@ -9,7 +9,7 @@
  *                                        each is accepted once two different
  *                                        people send the same value, or by the
  *                                        moderator.
- *   The pin is in the wrong place     -> report (kind "location")
+ *   (A misplaced pin is corrected through the address, under "details".)
  *   Something else                    -> report (kind "other"), text required
  *
  * Reports never change anything by themselves; they go to the moderator.
@@ -30,7 +30,7 @@ const DETAILS = REPORT_FIELDS.find((f) => f.key === 'details');
 const kit = createForm(form, [...EDITS, DETAILS]);
 const captcha = createCaptcha($('submit'));
 
-const KINDS = ['closed', 'details', 'location', 'other'];
+const KINDS = ['closed', 'details', 'other'];
 let restaurant = null;  // the record from the map's data
 let original = {};      // its current values, in form-field terms
 // Every listing takes corrections field by field (a בהשגחה one into its shadow
@@ -92,8 +92,7 @@ function setMode(kind) {
   // The details box: required where it is the whole message.
   const label = $('field-details').querySelector('label');
   const required = kind === 'other' || (kind === 'details' && !canEdit);
-  label.textContent = t(required ? 'update.details.required'
-    : kind === 'location' ? 'update.details.location' : 'update.details.optional');
+  label.textContent = t(required ? 'update.details.required' : 'update.details.optional');
   if (required) label.append(el('span', { className: 'req', textContent: ' *', title: t('required') }));
   kit.showError('details', null);
 
