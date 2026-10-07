@@ -2,14 +2,13 @@
  * Update or report a restaurant: update.html?id=<id>, opened from a popup.
  *
  *   It has closed                     -> report (kind "closed")
- *   Some details are wrong / missing  -> jdn listing: a correction form with the
- *                                        current details filled in; only changed
- *                                        fields are sent (/api/edits), and each
- *                                        is accepted once two different people
- *                                        send the same value, or by the moderator.
- *                                        Community entry: a report with text --
- *                                        the server takes field edits for jdn's
- *                                        listings only.
+ *   Some details are wrong / missing  -> a correction form with the current
+ *                                        details filled in -- the same for a
+ *                                        בהשגחה listing and one of ours. Only
+ *                                        changed fields are sent (/api/edits);
+ *                                        each is accepted once two different
+ *                                        people send the same value, or by the
+ *                                        moderator.
  *   The pin is in the wrong place     -> report (kind "location")
  *   Something else                    -> report (kind "other"), text required
  *
@@ -34,7 +33,9 @@ const captcha = createCaptcha($('submit'));
 const KINDS = ['closed', 'details', 'location', 'other'];
 let restaurant = null;  // the record from the map's data
 let original = {};      // its current values, in form-field terms
-let canEdit = false;    // jdn listings take field edits; community entries take reports
+// Every listing takes corrections field by field (a בהשגחה one into its shadow
+// listing, one of ours directly); kept as a switch in case a kind ever can't.
+let canEdit = true;
 
 // A record from the map in the form's field names (the map calls hechsher "kashrut").
 const asFields = (r) => ({
@@ -190,7 +191,6 @@ async function start() {
     $('missing').hidden = false;
     return;
   }
-  canEdit = restaurant.source !== 'community';
   original = asFields(restaurant);
 
   showCurrent(restaurant);

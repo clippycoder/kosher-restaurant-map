@@ -43,30 +43,39 @@ form ──POST /api/submissions──▶ validate ─▶ captcha ─▶ rate li
 - **Reports** ("closed", "wrong details", "wrong location", "kashrut changed") are
   stored for the moderator and never change anything by themselves.
 
-## Editing jdn restaurants
+## Correcting listings
 
-An edit (`POST /api/edits`) names a jdn restaurant and carries only the fields it
-changes. Each field is decided on its own:
+Community listings and jdn listings are corrected the same way. An edit
+(`POST /api/edits`) names a listing -- a jdn post id or one of ours, `c<id>` --
+and carries only the fields it changes. Each field is decided on its own:
 
 - **Two different people, same value → accepted immediately.** Different means
   a different fingerprint *and* at least an hour apart, so flipping from Wi-Fi to
-  mobile data doesn't let someone confirm their own edit. "Same" ignores
-  case, spacing and punctuation (including the maqaf), and phones compare as
-  numbers. Same person twice doesn't count. If one edit changes phone and hours
-  and another only the phone, the phone is accepted and the hours keep waiting.
-- **Otherwise it waits** for a matching second edit or the moderator. "Different
-  people" is judged by the submitter fingerprint, which lasts 30 days, so a
-  second edit has to arrive within 30 days to confirm the first automatically.
-- **Flagged edits** (spam in name/address/city) neither confirm nor get confirmed.
+  mobile data doesn't let someone confirm their own edit. "Same" ignores case,
+  spacing and punctuation (including the maqaf); phones compare as numbers.
+  Changing one field and another field on the same edit are decided separately.
+- **Otherwise it waits** for a matching second edit (within the fingerprint's 30
+  days) or the moderator. Flagged edits neither confirm nor get confirmed.
+- **An edit made against a value that has since changed goes `stale`** and can't
+  confirm edits made against the new value.
 
-Accepted values form **our version** of the restaurant, one row per field in
-`versions`, published at `GET /api/versions`. Each row stores the jdn value it
-replaced. **When jdn changes a field, theirs wins for that field only**: our
-value for it is dropped, and our values for the restaurant's other fields stay.
-Pending edits made against jdn's old value go `stale` and can't be confirmed by
-edits made against the new one. The worker retires overtaken rows whenever the
-restaurant is next edited; the build applies a value only while jdn's current
-value still matches `base`, so the map is right either way.
+**Where an accepted value goes.** For a community listing, into its own data.
+For a jdn listing, into its **shadow**: our own listing in `submissions`
+(`shadows` = the jdn id), created by the first accepted correction. It holds a
+full copy of the jdn listing with our corrections applied, and for each corrected
+field the jdn value it replaced. Shadows follow jdn:
+
+- fields nobody corrected always show jdn's value;
+- when jdn changes a corrected field, jdn's value wins and that correction is
+  dropped (the shadow goes when none are left);
+- when jdn removes the listing, the shadow is **held** for the moderator;
+  publishing it keeps it as a listing of our own (it stops shadowing). If jdn's
+  listing comes back first, the shadow is released.
+
+The nightly cron runs this sync (`moderate.mjs sync` runs it now); it does
+nothing if jdn's data can't be read or looks truncated. The build reads shadows
+through `GET /api/versions` (per field, with `base`) and community listings
+through `GET /api/published`, which excludes shadows.
 
 ## Fields
 
@@ -111,8 +120,9 @@ node scripts/moderate.mjs delete 12            # for removal requests
 node scripts/moderate.mjs edits                # pending edits of jdn restaurants
 node scripts/moderate.mjs accept 7 phone hours  # accept named fields (or all)
 node scripts/moderate.mjs decline 7
-node scripts/moderate.mjs versions             # our values over jdn's
+node scripts/moderate.mjs versions             # corrections held in shadows of jdn listings
 node scripts/moderate.mjs unversion 2699 phone # drop one; jdn's shows again
+node scripts/moderate.mjs sync                 # bring shadows into step with jdn now
 node scripts/moderate.mjs reports              # open reports
 node scripts/moderate.mjs resolve 3 "hid it"
 ```

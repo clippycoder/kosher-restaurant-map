@@ -20,7 +20,11 @@ export async function jdnRecords(env) {
   });
   if (!res.ok) throw new Error(`dataset ${res.status}`);
   const data = await res.json();
-  const byId = new Map((data.restaurants || []).map((r) => [String(r.id), r]));
+  // The map also carries our community listings (the build merges them in);
+  // they are ours, not jdn's, and are read from the database instead.
+  const byId = new Map((data.restaurants || [])
+    .filter((r) => r.source !== 'community')
+    .map((r) => [String(r.id), r]));
   cache = { at: Date.now(), byId };
   return byId;
 }

@@ -14,7 +14,8 @@
  *   edits [pending|all]                    edits of jdn restaurants, default: pending
  *   accept <edit-id> [field...]            accept all (or the named) undecided fields
  *   decline <edit-id> [field...]
- *   versions                               our accepted values over jdn's
+ *   versions                               our corrections to jdn listings (their shadows)
+ *   sync                                   bring shadows into step with jdn now (also nightly)
  *   unversion <restaurant> [field]         drop our value(s); jdn's show again
  *
  *   reports [open|resolved|dismissed|all]  default: open
@@ -52,7 +53,8 @@ const flagText = (f) => (f.kind === 'duplicate'
 
 function printSubmission(s, full = false) {
   const d = s.data;
-  console.log(`#${s.id} [${s.status}] ${d.name} — ${d.address}, ${d.city} · ` +
+  const what = s.shadows ? ` (shadow of jdn ${s.shadows})` : '';
+  console.log(`#${s.id} [${s.status}]${what} ${d.name} — ${d.address}, ${d.city} · ` +
     [d.type, d.hechsher, d.phone].filter(Boolean).join(' · '));
   for (const f of s.flags) console.log(`    ! ${flagText(f)}`);
   if (!full) return;
@@ -130,10 +132,14 @@ switch (cmd) {
     const { versions } = await api('GET', 'versions');
     if (!versions.length) console.log('nothing here');
     for (const v of versions) {
-      console.log(`restaurant ${v.restaurant} ${v.field}: "${v.base}" -> "${v.value}" (${v.accepted_at})`);
+      console.log(`jdn ${v.restaurant} (shadow ${v.shadow}, ${v.status}) ${v.field}: ` +
+        `"${v.base}" -> "${v.value}" (${v.accepted_at})`);
     }
     break;
   }
+  case 'sync':
+    console.log(await api('POST', 'sync'));
+    break;
   case 'unversion': {
     if (!/^\d+$/.test(args[0] || '')) {
       console.error('needs a restaurant id');
@@ -159,6 +165,6 @@ switch (cmd) {
   }
   default:
     console.log('commands: list, show, publish, reject, edit, delete, edits, accept, decline, ' +
-      'versions, unversion, reports, resolve, dismiss');
+      'versions, unversion, sync, reports, resolve, dismiss');
     process.exit(cmd ? 2 : 0);
 }

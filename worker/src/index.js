@@ -34,7 +34,7 @@ import { validate, publicSpec, FIELDS, REPORT_FIELDS } from '../../public/forms/
 import { spamFlags, duplicateFlags } from './screen.js';
 import { jdnRecords } from './dataset.js';
 import { intake, purgeClientHashes } from './intake.js';
-import { submitEdit, publicVersions, adminEdits } from './edits.js';
+import { submitEdit, publicVersions, adminEdits, syncShadows, REMOVED_FLAG } from './edits.js';
 import { json, corsHeaders, readBody, requireAdmin } from './http.js';
 
 export { purgeClientHashes };
@@ -49,9 +49,11 @@ export default {
     }
   },
 
-  // Nightly: forget submitter fingerprints older than 30 days.
+  // Nightly: forget submitter fingerprints older than 30 days, and bring every
+  // shadow listing into step with its jdn listing.
   async scheduled(_event, env) {
     await purgeClientHashes(env);
+    console.log('syncShadows', JSON.stringify(await syncShadows(env)));
   },
 };
 
@@ -63,7 +65,7 @@ async function route(request, env) {
   if (p.startsWith('/api/admin/')) {
     const denied = await requireAdmin(request, env);
     if (denied) return denied;
-    if (/^\/api\/admin\/(edits|versions)(\/|$)/.test(p)) return adminEdits(request, env, url);
+    if (/^\/api\/admin\/(edits|versions|sync)(\/|$)/.test(p)) return adminEdits(request, env, url);
     return admin(request, env, url);
   }
 
@@ -120,8 +122,9 @@ async function report(request, env, cors) {
 
 async function published(env, cors) {
   // Selects `data` only. `private` never leaves the database on this path.
+  // Our own listings only: shadows reach the map through /api/versions.
   const { results } = await env.DB.prepare(
-    "SELECT id, data, created_at FROM submissions WHERE status = 'published' ORDER BY id",
+    "SELECT id, data, created_at FROM submissions WHERE status = 'published' AND shadows IS NULL ORDER BY id",
   ).all();
   return json({
     generated: new Date().toISOString(),
@@ -142,8 +145,9 @@ async function existing(env) {
     // Don't hold every submission because Pages blinked; ours are still checked.
     console.error('dataset fetch failed', err);
   }
+  // Shadows duplicate a jdn listing by design; they are not new restaurants.
   const { results } = await env.DB.prepare(
-    "SELECT id, data FROM submissions WHERE status IN ('published', 'held')",
+    "SELECT id, data FROM submissions WHERE status IN ('published', 'held') AND shadows IS NULL",
   ).all();
   for (const row of results) {
     const d = JSON.parse(row.data);
@@ -160,8 +164,9 @@ const COLLECTIONS = {
     defaultStatus: 'held',
     actions: { publish: 'published', reject: 'rejected' },
     view: (r) => ({
-      id: r.id, ref: `c${r.id}`, status: r.status,
+      id: r.id, ref: `c${r.id}`, status: r.status, shadows: r.shadows ?? null,
       data: JSON.parse(r.data), private: JSON.parse(r.private), flags: JSON.parse(r.flags),
+      corrections: JSON.parse(r.corrections || '{}'),
       createdAt: r.created_at, reviewedAt: r.reviewed_at, reviewNote: r.review_note,
     }),
   },
@@ -222,6 +227,15 @@ async function admin(request, env, url) {
     if (Object.keys(v.errors).length) return json({ error: 'invalid', fields: v.errors }, 422);
     sets.data = JSON.stringify(v.public);
     sets.private = JSON.stringify(v.private);
+  }
+
+  // Publishing a shadow held because jdn removed its listing keeps it as a
+  // listing of our own: it stops shadowing and carries its full copy.
+  if (table === 'submissions' && status === 'published' && row.shadows &&
+      JSON.parse(row.flags).some((f) => f.kind === REMOVED_FLAG.kind)) {
+    sets.shadows = null;
+    sets.corrections = '{}';
+    sets.flags = JSON.stringify(JSON.parse(row.flags).filter((f) => f.kind !== REMOVED_FLAG.kind));
   }
 
   const cols = Object.keys(sets);

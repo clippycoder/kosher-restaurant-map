@@ -57,7 +57,15 @@
   };
 
   let map, cluster, plain;
-  const pinLayer = () => (state.allPins ? plain : cluster);
+
+  // "Show all pins" is offered, and acts, only from city-level zoom: drawing
+  // every restaurant as its own pin country-wide slowed browsers down. Even
+  // then only the pins in (and just around) the view are drawn, refreshed as
+  // the map moves. Further out, pins are grouped whatever the setting.
+  const ALL_PINS_MIN_ZOOM = 12;
+  let mappedRows = [];             // the current filter's restaurants with a pin
+  const plainMarkers = new Map();  // id -> its show-all marker, made on first need
+  const showingAll = () => state.allPins && map.getZoom() >= ALL_PINS_MIN_ZOOM;
 
   // -------------------------------------------------------------------------
   // filtering
@@ -164,20 +172,50 @@
     return box;
   }
 
-  function renderMarkers(rows, { fit = true } = {}) {
-    cluster.clearLayers();
-    plain.clearLayers();
-    const mapped = rows.filter((r) => r.lat !== null && r.lon !== null);
-    const markers = mapped.map((r) =>
-      L.marker([r.lat, r.lon], { title: r.name }).bindPopup(() => popupFor(r)));
-    if (state.allPins) markers.forEach((m) => plain.addLayer(m));
-    else cluster.addLayers(markers);
+  const markerFor = (r) => {
+    const m = L.marker([r.lat, r.lon], { title: r.name }).bindPopup(() => popupFor(r));
+    m.rid = r.id;
+    return m;
+  };
 
-    if (mapped.length && fit) {
-      map.fitBounds(L.latLngBounds(mapped.map((r) => [r.lat, r.lon])),
+  function renderMarkers(rows, { fit = true } = {}) {
+    mappedRows = rows.filter((r) => r.lat !== null && r.lon !== null);
+    // The grouped layer always holds the whole filter; it's what shows when
+    // zoomed out, and markercluster only draws what is visible.
+    cluster.clearLayers();
+    cluster.addLayers(mappedRows.map(markerFor));
+
+    if (mappedRows.length && fit) {
+      map.fitBounds(L.latLngBounds(mappedRows.map((r) => [r.lat, r.lon])),
         { padding: [40, 40], maxZoom: 15 });
     }
-    return mapped.length;
+    syncPins();
+    return mappedRows.length;
+  }
+
+  /** Shows grouped or individual pins for the current zoom; individual ones only near the view. */
+  function syncPins() {
+    const box = $('all-pins')?.closest('.pins-toggle');
+    if (box) box.hidden = map.getZoom() < ALL_PINS_MIN_ZOOM;
+
+    if (!showingAll()) {
+      if (map.hasLayer(plain)) map.removeLayer(plain);
+      plain.clearLayers();
+      if (!map.hasLayer(cluster)) map.addLayer(cluster);
+      return;
+    }
+    if (map.hasLayer(cluster)) map.removeLayer(cluster);
+    if (!map.hasLayer(plain)) map.addLayer(plain);
+    const view = map.getBounds().pad(0.3);
+    const wanted = new Set();
+    for (const r of mappedRows) {
+      if (!view.contains([r.lat, r.lon])) continue;
+      wanted.add(r.id);
+      if (!plainMarkers.has(r.id)) plainMarkers.set(r.id, markerFor(r));
+      const m = plainMarkers.get(r.id);
+      if (!plain.hasLayer(m)) plain.addLayer(m);
+    }
+    for (const m of plain.getLayers()) if (!wanted.has(m.rid)) plain.removeLayer(m);
   }
 
   // -------------------------------------------------------------------------
@@ -408,14 +446,14 @@
         L.DomEvent.disableClickPropagation(box);
         input.addEventListener('change', () => {
           state.allPins = input.checked;
-          map.removeLayer(state.allPins ? cluster : plain);
-          map.addLayer(pinLayer());
-          update({ fit: false }); // same view, different pins
+          syncPins(); // same view, different pins
+          writeHash();
         });
         return box;
       },
     });
     map.addControl(new PinsControl());
+    map.on('moveend', syncPins); // zoom changes end in a moveend too
 
     try {
       const res = await fetch(DATA_URL, { cache: 'no-cache' });
@@ -442,7 +480,6 @@
 
     readHash();
     $('all-pins').checked = state.allPins;
-    map.addLayer(pinLayer());
     wireUp();
     update();
   }

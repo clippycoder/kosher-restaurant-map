@@ -342,6 +342,7 @@ button:focus-visible {
   user-select: none;
 }
 .pins-toggle input { margin: 0; accent-color: var(--accent); }
+.pins-toggle[hidden] { display: none; } /* only offered from city-level zoom */
 
 /* ---------- mobile ---------- */
 

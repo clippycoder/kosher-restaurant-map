@@ -1,9 +1,9 @@
 # TODO
 
-- **"Show all pins" is slow.** It draws all ~626 restaurants as separate Leaflet
-  markers, each its own DOM element, and slows the browser down. Likely fix:
-  draw them on a canvas (`preferCanvas` / `L.circleMarker`), or only add the
-  pins inside the current view and refresh on pan/zoom.
+- **"Show all pins" performance.** Now offered only from zoom 12 and drawing
+  only pins near the view (central Jerusalem at zoom 12: 176 in view, ~220
+  drawn, down from all 626). If dense areas are still slow, draw on a canvas
+  (`preferCanvas` / `L.circleMarker`).
 - **53 pins sit at a city centre** because no address was found (e.g. landmarks
   like `קריית המדע הר חוצבים`). Fix by hand in `data/overrides.json`, or with a
   better geocoder (GovMap needs a registered API key).

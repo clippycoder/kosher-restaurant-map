@@ -102,12 +102,12 @@ see `worker/README.md` for screening, edits of jdn listings, and moderation.
 
 **Updating and reporting.** Every popup links to `update.html?id=<id>`:
 "it has closed", "the pin is in the wrong place" and "something else" are
-reports for the moderator (`moderate.mjs reports`); "details are wrong" opens,
-for a jdn listing, a correction form filled with the current details, and only
-the fields that changed are sent as an edit -- accepted once two different
-people send the same value, or by the moderator (`moderate.mjs edits`).
-Community entries take a written report instead; the server edits jdn listings
-only. The forms share `public/forms/kit.js`.
+reports for the moderator (`moderate.mjs reports`); "details are wrong" opens a
+correction form filled with the current details, and only the fields that
+changed are sent as an edit -- accepted once two different people send the same
+value, or by the moderator (`moderate.mjs edits`). Community and jdn listings are
+corrected the same way; a corrected jdn listing gets a *shadow*, our own listing
+that follows it (see `worker/README.md`). The forms share `public/forms/kit.js`.
 
 **Reaching the map.** The daily build reads the worker's two public lists --
 published submissions (`/api/published`) and accepted edits of jdn listings

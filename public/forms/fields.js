@@ -88,12 +88,13 @@ export const REPORT_FIELDS = [
 ];
 
 /**
- * An edit of a jdn restaurant: the same fields as a new submission, all
- * optional, sent with only what changes. Each changed field is accepted once a
- * second, different person submits the same value, or the moderator approves it.
+ * A correction to a listing -- a jdn post id or one of ours ("c<id>"): the same
+ * fields as a new submission, all optional, sent with only what changes. Each
+ * changed field is accepted once a second, different person submits the same
+ * value, or the moderator approves it.
  */
 export const EDIT_FIELDS = [
-  { key: 'restaurant', label: 'מסעדה', type: 'ref', pattern: '^\\d{1,9}$', required: true },
+  { key: 'restaurant', label: 'מסעדה', type: 'ref', pattern: '^c?\\d{1,9}$', required: true },
   ...FIELDS.filter((f) => f.editable !== false).map(({ required, ...f }) => f),
 ];
 

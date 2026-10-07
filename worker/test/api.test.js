@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import worker, { purgeClientHashes } from '../src/index.js';
+import { syncShadows } from '../src/edits.js';
 import { normalizePhone } from '../../public/forms/fields.js';
 import { spamFlags, dupKey } from '../src/screen.js';
 import { createD1 } from './d1.js';
@@ -14,8 +15,14 @@ const ORIGIN = 'https://clippycoder.github.io';
 const DATASET_URL = 'https://example.test/restaurants.json';
 
 // The live map, as the worker sees it. Rebuilt per test, since edit tests change it.
+// The shadow sync refuses a dataset under 100 listings (a truncated one is not
+// a mass removal), so the test map carries filler listings.
+const FILLER = Array.from({ length: 110 }, (_, i) => ({
+  id: 5000 + i, name: `מילוי ${i}`, address: `רחוב ${i} 1`, city: `עיר${i}`, type: 'חלבי',
+  kashrut: 'בית יוסף', phone: '', modified: '2026-09-01T00:00:00',
+}));
 const freshDataset = () => ({
-  restaurants: [
+  restaurants: [...FILLER.map((r) => ({ ...r })),
     { id: 2699, name: 'מסעדת שף קבלרו', address: 'המרפא 1', city: 'ירושלים', type: 'בשרי',
       kashrut: 'בד״ץ העדה״ח ירושלים', phone: '02-53-770-00', modified: '2026-09-01T00:00:00' },
     { id: 100, name: 'פיצה שמש', address: 'הרצל 1', city: 'קריית אונו', type: 'חלבי',
@@ -497,9 +504,9 @@ test('edits: no-op edits are refused', async () => {
   assert.equal(r.status, 422, 'same as our accepted version');
 });
 
-test('edits: only jdn restaurants on the map can be edited', async () => {
+test('edits: only listings that are on the map can be edited', async () => {
   assert.equal((await edit({ restaurant: '424242', phone: '02-999-9999' })).status, 422);
-  assert.equal((await edit({ restaurant: 'c1', phone: '02-999-9999' })).status, 422);
+  assert.equal((await edit({ restaurant: 'c1', phone: '02-999-9999' })).status, 422, 'no such community listing');
 });
 
 test('edits: a flagged edit neither confirms nor is confirmed', async () => {
@@ -514,8 +521,8 @@ test('edits: when jdn changes a field, only that field of our version is dropped
   assert.deepEqual(Object.keys(await versions()).length, 1);
 
   // jdn updates the phone, not the hours
-  DATASET.restaurants[0].phone = '02-111-2222';
-  DATASET.restaurants[0].modified = '2026-10-01T00:00:00';
+  DATASET.restaurants.find((r) => r.id === 2699).phone = '02-111-2222';
+  DATASET.restaurants.find((r) => r.id === 2699).modified = '2026-10-01T00:00:00';
   resetDatasetCache();
 
   // retirement happens on the next edit of that restaurant (the build also checks `base`)
@@ -527,7 +534,7 @@ test('edits: when jdn changes a field, only that field of our version is dropped
 
 test('edits: a pending edit made against an old jdn value cannot be confirmed by one against the new', async () => {
   await edit({ phone: '02-999-9999' }, '1.1.1.1');
-  DATASET.restaurants[0].phone = '02-111-2222';
+  DATASET.restaurants.find((r) => r.id === 2699).phone = '02-111-2222';
   resetDatasetCache();
   const r = await edit({ phone: '02-999-9999' }, '2.2.2.2');
   assert.deepEqual(r.body.accepted, []);
@@ -626,4 +633,148 @@ test('captcha: siteverify being unreachable fails closed', async () => {
     return orig(url, init);
   };
   assert.equal((await submit(VALID)).status, 403);
+});
+
+// --- community listings are corrected the same way ------------------------------
+
+test('community: a listing of ours is corrected field by field, like a jdn one', async () => {
+  await submit(VALID); // c1
+  const first = await edit({ restaurant: 'c1', phone: '02-999-9999', hours: '12-22' }, '1.1.1.1');
+  assert.deepEqual(first.body.accepted, []);
+  const second = await edit({ restaurant: 'c1', phone: '029999999' }, '2.2.2.2');
+  assert.deepEqual(second.body.accepted, ['phone']);
+  const pub = (await call('GET', '/api/published')).body.submissions[0];
+  assert.equal(pub.phone, '029999999', 'the listing itself now has the corrected phone');
+  assert.ok(!pub.hours, 'the unconfirmed field is not applied');
+  const adm = await call('GET', '/api/admin/submissions/1', { admin: true, origin: null });
+  assert.equal(adm.body.corrections.phone.previous, '025551234', 'what it replaced is kept');
+  assert.deepEqual(await versions(), {}, 'community corrections are not jdn versions');
+});
+
+test('community: an edit made against an old value cannot confirm one against the new', async () => {
+  await submit(VALID);
+  await edit({ restaurant: 'c1', hours: 'A' }, '1.1.1.1');
+  await edit({ restaurant: 'c1', phone: '02-111-1111' }, '1.1.1.1');
+  await edit({ restaurant: 'c1', phone: '02-111-1111' }, '2.2.2.2'); // phone accepted
+  // someone saw the old phone and sends a different one; their base is gone
+  const stale = env.DB.raw.prepare("SELECT status FROM edit_fields WHERE field = 'hours'").get();
+  assert.equal(stale.status, 'pending', 'other fields are untouched');
+  const r = await edit({ restaurant: 'c1', phone: '02-111-1111' }, '3.3.3.3');
+  assert.equal(r.status, 422, 'already the value: nothing to change');
+});
+
+// --- shadows of jdn listings ------------------------------------------------------
+
+const shadowRow = () => env.DB.raw.prepare("SELECT * FROM submissions WHERE shadows = '2699'").get();
+
+test('shadows: the first accepted correction of a jdn listing creates our own listing that shadows it', async () => {
+  assert.equal(shadowRow(), undefined);
+  for (const ip of ['1.1.1.1', '2.2.2.2']) await edit({ phone: '02-999-9999' }, ip);
+  const row = shadowRow();
+  assert.ok(row, 'a shadow listing exists');
+  assert.equal(row.status, 'published');
+  const data = JSON.parse(row.data);
+  assert.equal(data.name, 'מסעדת שף קבלרו', 'a full copy of the jdn listing');
+  assert.equal(data.phone, '029999999', 'with the correction applied');
+  assert.deepEqual(Object.keys(JSON.parse(row.corrections)), ['phone']);
+  assert.equal(JSON.parse(row.corrections).phone.base, '02-53-770-00');
+  // the build still gets the same per-field feed
+  assert.equal((await versions())['2699'].phone.value, '029999999');
+  // shadows are not new restaurants
+  assert.equal((await call('GET', '/api/published')).body.submissions.length, 0);
+  const again = await submit({ ...VALID, name: 'מקום אחר', phone: '02-444-4444' });
+  assert.equal(again.body.status, 'published', 'a shadow is not counted as a duplicate source');
+});
+
+test('shadows: further corrections go into the same shadow', async () => {
+  for (const ip of ['1.1.1.1', '2.2.2.2']) await edit({ phone: '02-999-9999' }, ip);
+  for (const ip of ['3.3.3.3', '4.4.4.4']) await edit({ hours: '12-22' }, ip);
+  const rows = env.DB.raw.prepare("SELECT * FROM submissions WHERE shadows = '2699'").all();
+  assert.equal(rows.length, 1);
+  assert.deepEqual(Object.keys(JSON.parse(rows[0].corrections)).sort(), ['hours', 'phone']);
+});
+
+test('sync: fields nobody corrected follow jdn; a field jdn changes drops our correction', async () => {
+  for (const ip of ['1.1.1.1', '2.2.2.2']) await edit({ phone: '02-999-9999', hours: '12-22' }, ip);
+  const jdn = DATASET.restaurants.find((r) => r.id === 2699);
+  jdn.name = 'שף קבלרו החדשה';   // uncorrected field: the shadow's copy follows
+  jdn.phone = '02-777-7777';     // corrected field: jdn wins
+  resetDatasetCache();
+  const stats = await syncShadows(env);
+  assert.deepEqual(stats, { refreshed: 1, dropped: 0, held: 0, released: 0 });
+  const row = shadowRow();
+  const data = JSON.parse(row.data);
+  assert.equal(data.name, 'שף קבלרו החדשה');
+  assert.equal(data.phone, '02-777-7777');
+  assert.deepEqual(Object.keys(JSON.parse(row.corrections)), ['hours']);
+  assert.deepEqual(Object.keys((await versions())['2699']), ['hours']);
+});
+
+test('sync: when jdn overtakes every correction, the shadow goes', async () => {
+  for (const ip of ['1.1.1.1', '2.2.2.2']) await edit({ phone: '02-999-9999' }, ip);
+  DATASET.restaurants.find((r) => r.id === 2699).phone = '02-777-7777';
+  resetDatasetCache();
+  assert.deepEqual(await syncShadows(env), { refreshed: 0, dropped: 1, held: 0, released: 0 });
+  assert.equal(shadowRow(), undefined);
+});
+
+test('sync: jdn removes the listing -> the shadow is held for review; it returns -> released', async () => {
+  for (const ip of ['1.1.1.1', '2.2.2.2']) await edit({ phone: '02-999-9999' }, ip);
+  const saved = DATASET.restaurants.find((r) => r.id === 2699);
+  DATASET.restaurants = DATASET.restaurants.filter((r) => r.id !== 2699);
+  resetDatasetCache();
+  assert.equal((await syncShadows(env)).held, 1);
+  let row = shadowRow();
+  assert.equal(row.status, 'held');
+  assert.match(row.flags, /removed from/);
+  assert.deepEqual(await versions(), {}, 'a held shadow is off the map');
+
+  DATASET.restaurants.push(saved);
+  resetDatasetCache();
+  assert.equal((await syncShadows(env)).released, 1);
+  row = shadowRow();
+  assert.equal(row.status, 'published');
+  assert.doesNotMatch(row.flags, /removed from/);
+});
+
+test('sync: a truncated dataset changes nothing', async () => {
+  for (const ip of ['1.1.1.1', '2.2.2.2']) await edit({ phone: '02-999-9999' }, ip);
+  DATASET.restaurants = DATASET.restaurants.slice(0, 5).filter((r) => r.id !== 2699);
+  resetDatasetCache();
+  assert.deepEqual(await syncShadows(env), { skipped: true });
+  assert.equal(shadowRow().status, 'published');
+});
+
+test('a held shadow the moderator publishes becomes a listing of our own', async () => {
+  for (const ip of ['1.1.1.1', '2.2.2.2']) await edit({ phone: '02-999-9999' }, ip);
+  DATASET.restaurants = DATASET.restaurants.filter((r) => r.id !== 2699);
+  resetDatasetCache();
+  await syncShadows(env);
+  const id = shadowRow().id;
+  const r = await call('POST', `/api/admin/submissions/${id}`, { admin: true, origin: null, body: { action: 'publish' } });
+  assert.equal(r.body.status, 'published');
+  assert.equal(r.body.shadows, null);
+  const pub = (await call('GET', '/api/published')).body.submissions;
+  assert.equal(pub.length, 1);
+  assert.equal(pub[0].name, 'מסעדת שף קבלרו');
+  assert.equal(pub[0].phone, '029999999');
+});
+
+test('admin: sync on demand, and removing a correction from a shadow', async () => {
+  assert.equal((await call('POST', '/api/admin/sync', { origin: null })).status, 401);
+  for (const ip of ['1.1.1.1', '2.2.2.2']) await edit({ phone: '02-999-9999', hours: '12-22' }, ip);
+  const list = await call('GET', '/api/admin/versions', { admin: true, origin: null });
+  assert.equal(list.body.versions.length, 2);
+  await call('DELETE', '/api/admin/versions/2699/phone', { admin: true, origin: null });
+  assert.deepEqual(Object.keys((await versions())['2699']), ['hours']);
+  const sync = await call('POST', '/api/admin/sync', { admin: true, origin: null });
+  assert.deepEqual(sync.body, { refreshed: 1, dropped: 0, held: 0, released: 0 });
+});
+
+test('the map\'s own community listings are not read as jdn listings', async () => {
+  DATASET.restaurants.push({ id: 'c77', source: 'community', name: 'פיצה קהילתית', address: 'הרצל 3', city: 'חיפה', phone: '04-111-1111' });
+  resetDatasetCache();
+  const r = await submit({ ...VALID, name: 'פיצה קהילתית', city: 'חיפה', phone: '04-222-2222' });
+  // not flagged against the map file's copy; ours are checked from the database
+  assert.equal(r.body.status, 'published');
 });
