@@ -8,6 +8,11 @@
  * browser's preferences -- the first of Hebrew or English it lists. A browser
  * that lists neither gets English.
  *
+ * The page layout is the Hebrew one in both languages -- the sidebar on the
+ * right, the add button on the left -- so <html> is always dir="rtl". Only the
+ * text changes direction: in English, the stylesheets turn the text blocks
+ * (sidebar, popups, form, header labels) left-to-right; see `html[lang="en"]`.
+ *
  * Only the site's own interface is translated. Restaurant information -- names,
  * addresses, cities, hechsherim, types, regions -- stays exactly as in the data,
  * in Hebrew, on the map and in what the form stores.
@@ -36,7 +41,7 @@
   const lang = pick();
   const root = document.documentElement;
   root.lang = lang;
-  root.dir = lang === 'he' ? 'rtl' : 'ltr';
+  root.dir = 'rtl'; // the layout; English text is turned LTR block by block in CSS
   // The markup is written in Hebrew; hide it until translated so English
   // readers never see it flash.
   if (lang !== 'he') root.setAttribute('data-i18n-pending', '');
@@ -192,7 +197,7 @@
       'pop.type': 'Type',
       'pop.phone': 'Phone',
       'pop.approx.street': 'Approximate location: the street was found, but not the house number.',
-      'pop.approx.city': 'Approximate location: city centre only; no exact address was found.',
+      'pop.approx.city': 'Approximate location: city center only; no exact address was found.',
       'pop.navigate': 'Directions',
       'pop.details': 'Details',
       'pop.call': 'Call',

@@ -464,3 +464,14 @@ html[data-i18n-pending] body { visibility: hidden; }
   .lang-toggle .long { display: none; }
   .lang-toggle .short { display: inline; }
 }
+
+/* English text inside the Hebrew layout. The page stays dir="rtl" in both
+   languages, so everything keeps its place; these blocks hold text, and in
+   English it reads left to right. Only elements whose own direction moves
+   nothing else are listed -- not the language toggle, whose margin places it,
+   nor #unmapped, whose inset does (its contents are turned instead). */
+html[lang="en"] :is(.brand, .add-prompt, #filters-toggle, #add-restaurant,
+                    #sidebar-scroll, #status, #unmapped-toggle, #unmapped-list,
+                    .leaflet-popup-content) {
+  direction: ltr;
+}

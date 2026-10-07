@@ -20,8 +20,6 @@
 }
 .back:hover { background: var(--panel); }
 .back svg { width: 16px; height: 16px; }
-/* The chevron points back toward the start: right in Hebrew, left in English. */
-html[dir="ltr"] .back svg { transform: scaleX(-1); }
 
 .form-wrap {
   max-width: 620px;
@@ -62,8 +60,8 @@ details.section > summary::before {
   transition: transform .15s;
 }
 details.section[open] > summary::before { transform: rotate(45deg); }
-/* Left to right, closed points right instead. */
-html[dir="ltr"] details.section:not([open]) > summary::before { transform: rotate(-45deg); }
+/* English text runs left to right, so closed points right instead. */
+html[lang="en"] details.section:not([open]) > summary::before { transform: rotate(-45deg); }
 details.section > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 12px; }
 .section-body { padding: 0 18px 6px; }
 
@@ -110,7 +108,7 @@ details.section > summary:focus-visible { outline: 2px solid var(--accent); outl
 }
 /* Phone and link fields are LTR, but on the Hebrew page their placeholders and
    values sit at the right edge like everything else. */
-html[dir="rtl"] .field input[dir="ltr"] { text-align: right; }
+html[lang="he"] .field input[dir="ltr"] { text-align: right; }
 
 .field [aria-invalid="true"], .field[aria-invalid="true"] .pill { border-color: var(--accent); }
 
@@ -182,7 +180,9 @@ html[dir="rtl"] .field input[dir="ltr"] { text-align: right; }
 
 /* ---------- submit ---------- */
 
-.hp { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); inset-inline-start: -9999px; }
+/* Hidden by clipping, not by an offset: pushed 9999px toward the start, it
+   made the English (LTR text in an RTL page) form scroll sideways. */
+.hp { position: absolute; top: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 #captcha { margin: 4px 0 12px; min-height: 0; }
 
@@ -230,3 +230,7 @@ html[dir="rtl"] .field input[dir="ltr"] { text-align: right; }
 @media (prefers-reduced-motion: reduce) {
   details.section > summary::before { transition: none; }
 }
+
+/* English: the form's text reads left to right inside the (Hebrew) layout.
+   The header's back link keeps its place and its arrow. */
+html[lang="en"] :is(.form-wrap, .brand) { direction: ltr; }

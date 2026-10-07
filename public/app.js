@@ -376,7 +376,7 @@
     const when = new Date(state.meta.generated);
     $('meta').replaceChildren(
       document.createTextNode(
-        `${t('meta.updated', { date: when.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB') })} · `),
+        `${t('meta.updated', { date: when.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-US') })} · `),
       el('a', {
         href: safeUrl(state.meta.source) || '#', target: '_blank', rel: 'noopener noreferrer',
         text: t('meta.source'),
