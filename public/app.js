@@ -21,6 +21,8 @@
   const HASH_KEYS = { types: 't', areas: 'a', cities: 'c', hechsherim: 'k' };
 
   const $ = (id) => document.getElementById(id);
+  // Interface text only (i18n.js); restaurant information is shown as it is.
+  const { t, lang } = window.i18n;
 
   const el = (tag, props = {}, children = []) => {
     const node = document.createElement(tag);
@@ -95,10 +97,10 @@
       dl.appendChild(el('dt', { text: label }));
       dl.appendChild(el('dd', { text: value }));
     };
-    row('כתובת', [r.address, r.city].filter(Boolean).join(', '));
-    row('כשרות', r.kashrut);
-    row('סוג', r.type);
-    row('טלפון', r.phone);
+    row(t('pop.address'), [r.address, r.city].filter(Boolean).join(', '));
+    row(t('pop.kashrut'), r.kashrut);
+    row(t('pop.type'), r.type);
+    row(t('pop.phone'), r.phone);
 
     const box = el('div', { class: 'pop' }, [el('h3', { text: r.name })]);
 
@@ -111,28 +113,24 @@
     box.appendChild(dl);
 
     // Anything short of a house-number match gets an explicit caveat.
-    const APPROX = {
-      street: 'מיקום משוער — הרחוב אותר, אך לא מספר הבית.',
-      city: 'מיקום משוער — מרכז העיר בלבד, לא נמצאה כתובת מדויקת.',
-    };
-    if (APPROX[r.precision]) {
-      box.appendChild(el('p', { class: 'approx', text: APPROX[r.precision] }));
+    if (r.precision === 'street' || r.precision === 'city') {
+      box.appendChild(el('p', { class: 'approx', text: t(`pop.approx.${r.precision}`) }));
     }
 
     const links = el('div', { class: 'links' });
     const q = encodeURIComponent([r.name, r.address, r.city, 'ישראל'].filter(Boolean).join(', '));
     links.appendChild(el('a', {
       href: `https://www.google.com/maps/search/?api=1&query=${q}`,
-      target: '_blank', rel: 'noopener noreferrer', text: 'ניווט',
+      target: '_blank', rel: 'noopener noreferrer', text: t('pop.navigate'),
     }));
     const detailUrl = safeUrl(r.link);
     if (detailUrl) {
       links.appendChild(el('a', {
-        href: detailUrl, target: '_blank', rel: 'noopener noreferrer', text: 'פרטים',
+        href: detailUrl, target: '_blank', rel: 'noopener noreferrer', text: t('pop.details'),
       }));
     }
     if (r.phone) {
-      links.appendChild(el('a', { href: `tel:${r.phone.replace(/[^\d+]/g, '')}`, text: 'חיוג' }));
+      links.appendChild(el('a', { href: `tel:${r.phone.replace(/[^\d+]/g, '')}`, text: t('pop.call') }));
     }
     box.appendChild(links);
     return box;
@@ -198,7 +196,7 @@
     });
 
     if (!visible.length) {
-      box.appendChild(el('p', { class: 'empty-note', text: 'אין ערים תואמות' }));
+      box.appendChild(el('p', { class: 'empty-note', text: t('city.none') }));
       return;
     }
 
@@ -209,7 +207,7 @@
     }
 
     for (const [area, list] of byArea) {
-      box.appendChild(el('div', { class: 'city-group', text: area || 'אחר' }));
+      box.appendChild(el('div', { class: 'city-group', text: area || t('city.otherArea') }));
       for (const c of list) {
         const n = counts.get(c.name) || 0;
         box.appendChild(option('cities', c.name, n, sel.has(c.name), n === 0 && !sel.has(c.name)));
@@ -225,7 +223,7 @@
     section.hidden = unmapped.length === 0;
     if (!unmapped.length) return;
 
-    $('unmapped-count').textContent = String(unmapped.length);
+    $('unmapped-label').textContent = t('unmapped', { n: unmapped.length });
     list.replaceChildren(...unmapped.map((r) =>
       el('li', {}, [
         el('span', { class: 'n', text: r.name }),
@@ -281,16 +279,16 @@
     const total = state.meta.counts.total;
     $('result-count').textContent =
       rows.length === total
-        ? `${total} מסעדות`
-        : `${rows.length} מתוך ${total}`;
+        ? t('count.all', { n: total })
+        : t('count.some', { n: rows.length, total });
 
     const status = $('status');
     if (!rows.length) {
       status.hidden = false;
-      status.textContent = 'אין תוצאות לסינון הנוכחי';
+      status.textContent = t('status.none');
     } else if (mappedCount === 0) {
       status.hidden = false;
-      status.textContent = 'לאף תוצאה אין מיקום על המפה';
+      status.textContent = t('status.noneMapped');
     } else {
       status.hidden = true;
     }
@@ -370,20 +368,21 @@
       state.meta = await res.json();
       state.all = state.meta.restaurants;
     } catch (err) {
-      $('status').textContent = 'שגיאה בטעינת הנתונים';
+      $('status').textContent = t('status.error');
       console.error(err);
       return;
     }
 
     const when = new Date(state.meta.generated);
     $('meta').replaceChildren(
-      document.createTextNode(`עודכן: ${when.toLocaleDateString('he-IL')} · `),
+      document.createTextNode(
+        `${t('meta.updated', { date: when.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB') })} · `),
       el('a', {
         href: safeUrl(state.meta.source) || '#', target: '_blank', rel: 'noopener noreferrer',
-        text: 'מקור הנתונים: בהשגחה',
+        text: t('meta.source'),
       }),
-      document.createTextNode(
-        ` · ${state.meta.counts.mapped} ממופות, ${state.meta.counts.unmapped} ללא מיקום`),
+      document.createTextNode(` · ${t('meta.counts', {
+        mapped: state.meta.counts.mapped, unmapped: state.meta.counts.unmapped })}`),
     );
 
     readHash();

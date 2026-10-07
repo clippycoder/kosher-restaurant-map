@@ -154,11 +154,6 @@ export function normalizePhone(raw) {
 /** The number alone, without any extension, for comparing two phones. */
 export const phoneKey = (p) => (normalizePhone(p) || '').split(' ')[0];
 
-// Each number sits in a left-to-right isolate (U+2066...U+2069); without them
-// an RTL sentence reorders the digits and commas around each other.
-const PHONE_EXAMPLES = ['02-5377000', '054-1234567', '1-700-500-500', '*2242'];
-const ltr = (s) => `\u2066${s}\u2069`;
-export const PHONE_HINT = `לדוגמה ${PHONE_EXAMPLES.slice(0, -1).map(ltr).join(', ')} או ${ltr(PHONE_EXAMPLES.at(-1))}`;
 
 function normalizeUrl(raw) {
   let s = clean(raw).trim();
@@ -174,7 +169,9 @@ function normalizeUrl(raw) {
 }
 
 /**
- * Returns { public, private, errors }. `errors` maps field key -> Hebrew message.
+ * Returns { public, private, errors }. `errors` maps field key -> an error code
+ * (required, too_long, invalid, bad_phone), which each page words in its own
+ * language; too_long's limit is the field's `max`.
  * Unknown keys are ignored rather than stored, so a client cannot smuggle
  * arbitrary data into the database.
  */
@@ -192,11 +189,11 @@ export function validate(input, fields = FIELDS) {
       .every(([k, want]) => [].concat(want).includes(values[k])));
 
     if (!v) {
-      if (required) out.errors[f.key] = 'שדה חובה';
+      if (required) out.errors[f.key] = 'required';
       continue;
     }
     if (f.max && v.length > f.max) {
-      out.errors[f.key] = `עד ${f.max} תווים`;
+      out.errors[f.key] = 'too_long';
       continue;
     }
 
@@ -210,8 +207,7 @@ export function validate(input, fields = FIELDS) {
       stored = Number.isFinite(n) && n >= f.range[0] && n <= f.range[1] ? Math.round(n * 1e6) / 1e6 : null;
     }
     if (stored === null) {
-      // The form shows PHONE_HINT under every phone field, so the error stays short.
-      out.errors[f.key] = f.type === 'phone' ? 'מספר טלפון לא תקין' : 'ערך לא חוקי';
+      out.errors[f.key] = f.type === 'phone' ? 'bad_phone' : 'invalid';
       continue;
     }
     (f.private ? out.private : out.public)[f.key] = stored;

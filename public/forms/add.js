@@ -1,16 +1,18 @@
 /**
  * The add-a-restaurant form. Rendered from the shared field definitions, checked
  * as you type with the same rules the server applies, and sent to our own API.
- * All text that reaches the page is set with textContent.
+ * Interface text comes from i18n.js (Hebrew or English); what people enter is
+ * stored as entered. All text that reaches the page is set with textContent.
  */
 
 import {
-  FIELDS, SUBMISSION_SECTIONS, HONEYPOT, PHONE_HINT, validate,
+  FIELDS, SUBMISSION_SECTIONS, HONEYPOT, validate,
 } from './fields.js';
 import { duplicateFlags, dupKey } from './match.js';
 import { attachPlaces, findSettlement } from './places.js';
 import { API_BASE, TURNSTILE_SITE_KEY, TURNSTILE_ACTION } from './config.js';
 
+const { t, choice, lang } = window.i18n;
 const $ = (id) => document.getElementById(id);
 const el = (tag, props = {}, ...children) => {
   const node = Object.assign(document.createElement(tag), props);
@@ -88,14 +90,17 @@ function control(f) {
     const group = el('div', { className: 'pills', id, role: 'radiogroup' });
     for (const opt of f.options) {
       const radio = el('input', { type: 'radio', name: f.key, value: opt, id: `${id}-${opt}` });
+      // Restaurant information (בשרי/חלבי/פרווה) is shown as stored, in Hebrew.
       group.append(el('label', { className: 'pill', htmlFor: radio.id }, radio, el('span', { textContent: opt })));
     }
     return group;
   }
   if (f.type === 'choice') {
     const select = el('select', { id, name: f.key });
-    select.append(el('option', { value: '', textContent: f.required ? 'בחרו…' : 'לא ידוע' }));
-    for (const opt of f.options) select.append(el('option', { value: opt, textContent: opt }));
+    select.append(el('option', { value: '', textContent: f.required ? t('choose') : t('unknown') }));
+    // Hechsherim are restaurant information and stay Hebrew; only the form's
+    // own answers (yes/no, relation to the place) are translated.
+    for (const opt of f.options) select.append(el('option', { value: opt, textContent: choice(opt) }));
     return select;
   }
   if (f.type === 'textarea') return el('textarea', { id, name: f.key, maxLength: f.max, rows: 3 });
@@ -105,7 +110,7 @@ function control(f) {
   if (f.type === 'phone') {
     Object.assign(input, { type: 'tel', inputMode: 'tel', dir: 'ltr', autocomplete: 'tel' });
   }
-  if (f.type === 'url') Object.assign(input, { inputMode: 'url', dir: 'ltr', placeholder: 'https://… או ‎@instagram' });
+  if (f.type === 'url') Object.assign(input, { inputMode: 'url', dir: 'ltr', placeholder: t('placeholder.url') });
   if (f.key === 'name') input.autocomplete = 'organization';
   return input;
 }
@@ -115,15 +120,21 @@ function fieldBlock(f) {
   const id = `f-${f.key}`;
   const isGroup = f.type === 'choice' && f.required && f.options.length <= 3;
   const wrap = el(isGroup ? 'fieldset' : 'div', { className: 'field', id: `field-${f.key}` });
-  const title = el(isGroup ? 'legend' : 'label', { textContent: f.label });
+  const title = el(isGroup ? 'legend' : 'label', { textContent: t(`field.${f.key}`) });
   if (!isGroup) title.htmlFor = id;
-  if (f.required) title.append(el('span', { className: 'req', textContent: ' *', title: 'שדה חובה' }));
-  if (f.private) title.append(el('span', { className: 'private', textContent: ' (יוצג רק למנהל האתר)' }));
+  if (f.required) title.append(el('span', { className: 'req', textContent: ' *', title: t('required') }));
+  if (f.private) title.append(el('span', { className: 'private', textContent: t('private') }));
   wrap.append(title, control(f));
 
   const describedBy = [];
   if (f.type === 'phone') {
-    const hint = el('p', { className: 'hint', id: `${id}-hint`, textContent: PHONE_HINT });
+    const hint = el('p', { className: 'hint', id: `${id}-hint`, textContent: t('hint.phone') });
+    wrap.append(hint);
+    describedBy.push(hint.id);
+  }
+  // In English: say that places are kept in Hebrew, as the map shows them.
+  if ((f.key === 'address' || f.key === 'city') && t('hint.hebrew')) {
+    const hint = el('p', { className: 'hint', id: `${id}-lang`, textContent: t('hint.hebrew') });
     wrap.append(hint);
     describedBy.push(hint.id);
   }
@@ -140,15 +151,15 @@ function fieldBlock(f) {
 function render() {
   const main = $('section-main');
   const adv = $('section-advanced');
-  main.querySelector('h2').textContent = SUBMISSION_SECTIONS.main.label;
-  adv.querySelector('summary').textContent = SUBMISSION_SECTIONS.advanced.label;
+  main.querySelector('h2').textContent = t('section.main');
+  adv.querySelector('summary').textContent = t('section.advanced');
   adv.open = !SUBMISSION_SECTIONS.advanced.collapsed;
 
   const note = SUBMISSION_SECTIONS.advanced.note;
   if (note) {
-    const link = el('a', { href: note.link.href, textContent: note.link.label });
+    const link = el('a', { href: note.link.href, textContent: t('note.link') });
     if (note.link.newTab) Object.assign(link, { target: '_blank', rel: 'noopener noreferrer' });
-    adv.querySelector('.section-body').append(el('p', { className: 'note' }, note.text, ' ', link));
+    adv.querySelector('.section-body').append(el('p', { className: 'note' }, t('note.text'), ' ', link));
   }
 
   for (const f of FIELDS) {
@@ -168,9 +179,11 @@ function values() {
   return out;
 }
 
-function showError(key, msg) {
+/** `code` is a validation code (fields.js, or the server's 422), worded here. */
+function showError(key, code) {
   const f = byKey[key];
   if (!f || f.hidden) return;
+  const msg = code ? t(`err.${code}`, { max: f.max }) : '';
   const id = `f-${key}`;
   const err = $(`${id}-error`);
   err.textContent = msg || '';
@@ -215,15 +228,15 @@ function warnDuplicates() {
         href: `index.html#q=${encodeURIComponent(r.name)}`,
         target: '_blank',
         rel: 'noopener',
-        textContent: 'הצגה במפה',
+        textContent: t('dupes.show'),
       });
       list.append(el('li', {}, el('strong', { textContent: r.name }),
         ` — ${[r.address, r.city].filter(Boolean).join(', ')} `, link));
     }
     box.replaceChildren(
-      el('p', { textContent: 'ייתכן שהמסעדה כבר במפה:' }),
+      el('p', { textContent: t('dupes.title') }),
       list,
-      el('p', { className: 'muted', textContent: 'אם זו מסעדה אחרת (למשל סניף נוסף), אפשר להמשיך.' }),
+      el('p', { className: 'muted', textContent: t('dupes.note') }),
     );
     box.hidden = false;
   }, 300);
@@ -273,7 +286,7 @@ async function cityToHebrew() {
   const hebrew = await findSettlement(typed);
   if (!hebrew || city.value.trim() !== typed) return;
   city.value = canonicalCity(hebrew);
-  note.textContent = `שם העיר נשמר בעברית: ${city.value}`;
+  note.textContent = t('city.converted', { city: city.value });
   note.hidden = false;
   check('city');
   warnDuplicates();
@@ -322,20 +335,20 @@ async function submit(e) {
   FIELDS.forEach((f) => touched.add(f.key));
   const errors = checkAll();
   if (Object.keys(errors).length) {
-    setStatus('יש לתקן את השדות המסומנים.', 'error');
+    setStatus(t('st.fix'), 'error');
     focusFirstError(Object.keys(errors));
     return;
   }
 
   const body = values();
   if (!body['cf-turnstile-response']) {
-    setStatus('נא לאשר את בדיקת האבטחה למטה.', 'error');
+    setStatus(t('st.captcha'), 'error');
     return;
   }
 
   const button = $('submit');
   button.disabled = true;
-  setStatus('שולח…');
+  setStatus(t('st.sending'));
   let res;
   let out = {};
   try {
@@ -347,7 +360,7 @@ async function submit(e) {
     out = await res.json().catch(() => ({}));
   } catch {
     button.disabled = false;
-    setStatus('אין חיבור לשרת. נסו שוב בעוד רגע.', 'error');
+    setStatus(t('st.offline'), 'error');
     return;
   }
 
@@ -359,13 +372,13 @@ async function submit(e) {
   if (res.status === 422 && out.fields) {
     for (const [k, msg] of Object.entries(out.fields)) showError(k, msg);
     focusFirstError(Object.keys(out.fields));
-    setStatus('יש לתקן את השדות המסומנים.', 'error');
+    setStatus(t('st.fix'), 'error');
   } else if (res.status === 429) {
-    setStatus('הגעתם למספר ההגשות המרבי להיום. אפשר לנסות שוב מחר.', 'error');
+    setStatus(t('st.limit'), 'error');
   } else if (res.status === 403) {
-    setStatus('בדיקת האבטחה נכשלה. נסו שוב.', 'error');
+    setStatus(t('st.captchaFailed'), 'error');
   } else {
-    setStatus('משהו השתבש בשרת. נסו שוב מאוחר יותר.', 'error');
+    setStatus(t('st.server'), 'error');
   }
 }
 
@@ -373,10 +386,8 @@ function done(status) {
   const held = status === 'held';
   $('add-form').hidden = true;
   const box = $('done');
-  box.querySelector('h2').textContent = 'תודה!';
-  box.querySelector('p').textContent = held
-    ? 'ההגשה התקבלה ותיבדק לפני שתופיע במפה.'
-    : 'המסעדה תופיע במפה בעדכון הבא של האתר (פעם ביום).';
+  box.querySelector('h2').textContent = t('done.title');
+  box.querySelector('p').textContent = held ? t('done.held') : t('done.published');
   box.hidden = false;
   box.querySelector('h2').focus();
 }
@@ -386,7 +397,7 @@ function done(status) {
 function startTurnstile() {
   if (!TURNSTILE_SITE_KEY) {
     $('submit').disabled = true;
-    setStatus('הטופס עוד לא פתוח להגשות. אפשר להגיש בינתיים באתר בהשגחה (בפרטים נוספים).', 'info');
+    setStatus(t('st.notOpen'), 'info');
     return;
   }
   const started = Date.now();
@@ -395,15 +406,47 @@ function startTurnstile() {
   const wait = () => {
     if (typeof window.turnstile?.render === 'function') {
       turnstileId = window.turnstile.render('#captcha', {
-        sitekey: TURNSTILE_SITE_KEY, action: TURNSTILE_ACTION, language: 'he', size: 'flexible',
+        sitekey: TURNSTILE_SITE_KEY, action: TURNSTILE_ACTION, language: lang, size: 'flexible',
       });
     } else if (Date.now() - started < 15000) {
       setTimeout(wait, 150);
     } else {
-      setStatus('בדיקת האבטחה לא נטענה. רעננו את הדף.', 'error');
+      setStatus(t('st.captchaLoad'), 'error');
     }
   };
   wait();
+}
+
+// --- language switch --------------------------------------------------------------
+
+/**
+ * Switching language reloads the page; whatever was typed comes back. Kept in
+ * sessionStorage (this tab only) and removed as soon as it's restored. The
+ * captcha token and the honeypot are never kept.
+ */
+function keepDraftAcrossLanguageSwitch() {
+  const KEY = 'add-form-draft';
+  document.addEventListener('i18n:beforeswitch', () => {
+    const draft = values();
+    delete draft['cf-turnstile-response'];
+    delete draft[HONEYPOT];
+    try { sessionStorage.setItem(KEY, JSON.stringify(draft)); } catch { /* the draft is lost, not the switch */ }
+  });
+
+  let draft = null;
+  try {
+    draft = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+    sessionStorage.removeItem(KEY);
+  } catch { /* nothing to restore */ }
+  if (!draft) return;
+  for (const [k, v] of Object.entries(draft)) {
+    const f = byKey[k];
+    if (!f || !v) continue;
+    const radio = form.querySelector(`input[type=radio][name="${CSS.escape(k)}"][value="${CSS.escape(v)}"]`);
+    if (radio) radio.checked = true;
+    else if (form.elements[k]) form.elements[k].value = v;
+    if (f.section === 'advanced') $('section-advanced').open = true;
+  }
 }
 
 // --- go ------------------------------------------------------------------------
@@ -411,6 +454,7 @@ function startTurnstile() {
 render();
 wireCity();
 wireAddress();
+keepDraftAcrossLanguageSwitch();
 loadExisting();
 
 form.addEventListener('focusout', (e) => {

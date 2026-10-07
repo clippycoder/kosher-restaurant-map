@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>הוספת מסעדה · מפת מסעדות כשרות</title>
-<meta name="description" content="הוספת מסעדה בהשגחה למפת המסעדות הכשרות בישראל.">
+<title data-i18n="title.add">הוספת מסעדה · מפת מסעדות כשרות</title>
+<meta name="description" data-i18n-attr="content:desc.add" content="הוספת מסעדה בהשגחה למפת המסעדות הכשרות בישראל.">
+
+<!-- First, so the language and direction are set before anything paints. -->
+<script src="i18n.js"></script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="forms/form.css">
@@ -15,12 +18,13 @@
 
 <header id="topbar">
   <div class="brand">
-    <h1>הוספת מסעדה</h1>
+    <h1 data-i18n="add.heading">הוספת מסעדה</h1>
   </div>
+  <button type="button" class="lang-toggle" data-lang-toggle>English</button>
   <a class="back" href="index.html">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none"
       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span>חזרה למפה</span>
+    <span data-i18n="back">חזרה למפה</span>
   </a>
 </header>
 
@@ -44,22 +48,17 @@
 
     <p id="form-status" class="status" role="status" hidden></p>
 
-    <button id="submit" type="submit">שליחה</button>
+    <button id="submit" type="submit" data-i18n="submit">שליחה</button>
 
-    <p class="privacy">
-      מה נשמר: פרטי המסעדה שהוזנו. טלפונים של בעלים ומשגיח ותפקידכם במקום נראים רק למנהל האתר.
-      למניעת ספאם נשמר מזהה מוצפן חד־כיווני של כתובת ה־IP, ונמחק אחרי 30 יום.
-      כתובות מוצעות בעזרת Photon (OpenStreetMap), שמקבל את מה שמקלידים בשדה הכתובת;
-      בדיקת האבטחה של Cloudflare Turnstile.
-    </p>
+    <p class="privacy" data-i18n="privacy"></p>
   </form>
 
   <section id="done" class="done" hidden>
     <h2 tabindex="-1"></h2>
     <p></p>
     <div class="done-actions">
-      <a class="button" href="index.html">חזרה למפה</a>
-      <button id="again" type="button" class="secondary">הוספת מסעדה נוספת</button>
+      <a class="button" href="index.html" data-i18n="back">חזרה למפה</a>
+      <button id="again" type="button" class="secondary" data-i18n="done.again">הוספת מסעדה נוספת</button>
     </div>
   </section>
 

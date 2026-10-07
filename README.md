@@ -103,6 +103,19 @@ see `worker/README.md` for screening, edits of jdn listings, and moderation.
 The form states on the page what it stores: the submitted details, private
 phones visible only to the moderator, and a one-way hash of the IP kept 30 days.
 
+## Languages
+
+Hebrew and English, from `public/i18n.js`, loaded first on every page so the
+direction is set before anything paints. The language is a `?lang=he|en` link,
+else the header toggle's saved choice, else the browser's preferences (the first
+of Hebrew or English it lists; neither means English). Switching keeps the
+map's filters and anything typed into the form.
+
+Only the site's interface is translated. Restaurant information -- names,
+addresses, cities, hechsherim, types, regions -- stays in Hebrew everywhere,
+on the map and in what the form stores. Validation errors travel as codes
+(`required`, `bad_phone`...) and each page words them in its language.
+
 ## Layout
 
 | Path | Purpose |
@@ -112,6 +125,7 @@ phones visible only to the moderator, and a one-way hash of the IP kept 30 days.
 | `scripts/verify.mjs` | Checks the built dataset against the live API. |
 | `scripts/serve.mjs` | Static server for local preview. |
 | `worker/` | Community submissions API (Cloudflare Worker + D1). See `worker/README.md`. |
+| `public/i18n.js` | Hebrew/English interface text, language choice, the toggle. |
 | `public/add.html`, `public/forms/` | The add form: field definitions shared with the worker, Photon address suggestions, duplicate matching. |
 | `.cache/gazetteer/` | Downloaded OSM address data. Gitignored, safe to delete. |
 | `public/` | The deployed site. This directory is the Pages root. |

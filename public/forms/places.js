@@ -212,13 +212,13 @@ export function attachPlaces(input, {
       const wait = document.createElement('li');
       wait.className = 'places-loading';
       wait.setAttribute('aria-hidden', 'true');
-      wait.textContent = 'מחפש…';
+      wait.textContent = window.i18n.t('places.searching');
       list.append(wait);
     }
     const credit = document.createElement('li');
     credit.className = 'places-credit';
     credit.setAttribute('aria-hidden', 'true');
-    credit.textContent = 'הצעות: Photon · © OpenStreetMap';
+    credit.textContent = window.i18n.t('places.credit');
     list.append(credit);
     list.hidden = false;
     input.setAttribute('aria-expanded', 'true');

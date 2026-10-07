@@ -89,7 +89,7 @@ export async function submitEdit(request, env, cors) {
     return json({ error: 'temporarily unavailable' }, 503, cors);
   }
   const rec = records.get(restaurant);
-  if (!rec) return json({ error: 'invalid', fields: { restaurant: 'מסעדה לא נמצאה' } }, 422, cors);
+  if (!rec) return json({ error: 'invalid', fields: { restaurant: 'not_found' } }, 422, cors);
   const jdnFields = asFields(rec);
 
   await retireOvertaken(env, restaurant, jdnFields, now);

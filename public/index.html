@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>מפת מסעדות כשרות בישראל</title>
-<meta name="description" content="מפה של מסעדות בהשגחה בישראל, עם סינון לפי עיר, אזור, סוג וכשרות.">
+<title data-i18n="title.map">מפת מסעדות כשרות בישראל</title>
+<meta name="description" data-i18n-attr="content:desc.map" content="מפה של מסעדות בהשגחה בישראל, עם סינון לפי עיר, אזור, סוג וכשרות.">
+
+<!-- First, so the language and direction are set before anything paints. -->
+<script src="i18n.js"></script>
 
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 
@@ -22,66 +25,70 @@
 <body>
 
 <header id="topbar">
-  <button id="filters-toggle" type="button" aria-expanded="false" aria-controls="sidebar">
+  <button id="filters-toggle" type="button" aria-expanded="false" aria-controls="sidebar"
+          aria-label="סינון" data-i18n-attr="aria-label:filters">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"
       stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    <span>סינון</span>
+    <span data-i18n="filters">סינון</span>
   </button>
 
   <div class="brand">
-    <h1>מסעדות בהשגחה</h1>
-    <output id="result-count" aria-live="polite">טוען…</output>
+    <h1 data-i18n="brand">מסעדות בהשגחה</h1>
+    <output id="result-count" aria-live="polite" data-i18n="loading">טוען…</output>
   </div>
 
+  <button type="button" class="lang-toggle" data-lang-toggle>English</button>
+
   <div class="add-cta">
-    <span class="add-prompt">חסרה מסעדה?</span>
+    <span class="add-prompt" data-i18n="add.prompt">חסרה מסעדה?</span>
     <a id="add-restaurant" href="add.html">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"
         stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-      <span>הוספת מסעדה</span>
+      <span data-i18n="add.button">הוספת מסעדה</span>
     </a>
   </div>
 </header>
 
 <div id="shell">
 
-  <aside id="sidebar" aria-label="סינון תוצאות">
+  <aside id="sidebar" aria-label="סינון תוצאות" data-i18n-attr="aria-label:sidebar.label">
     <div id="sidebar-scroll">
 
       <div class="field">
-        <label for="search">חיפוש חופשי</label>
-        <input type="search" id="search" placeholder="שם מסעדה, רחוב או עיר" autocomplete="off">
+        <label for="search" data-i18n="search.label">חיפוש חופשי</label>
+        <input type="search" id="search" placeholder="שם מסעדה, רחוב או עיר" autocomplete="off"
+               data-i18n-attr="placeholder:search.placeholder">
       </div>
 
       <section class="facet" data-facet="types">
-        <h2>סוג</h2>
+        <h2 data-i18n="facet.types">סוג</h2>
         <div class="options" id="facet-types"></div>
       </section>
 
       <section class="facet" data-facet="areas">
-        <h2>אזור</h2>
+        <h2 data-i18n="facet.areas">אזור</h2>
         <div class="options" id="facet-areas"></div>
       </section>
 
       <section class="facet" data-facet="cities">
         <div class="facet-head">
-          <h2>עיר</h2>
-          <button type="button" class="clear-facet" data-clear="cities">נקה</button>
+          <h2 data-i18n="facet.cities">עיר</h2>
+          <button type="button" class="clear-facet" data-clear="cities" data-i18n="clear">נקה</button>
         </div>
         <input type="search" id="city-search" placeholder="חפש עיר…" autocomplete="off"
-               aria-label="חיפוש עיר">
+               aria-label="חיפוש עיר" data-i18n-attr="placeholder:city.search;aria-label:city.searchLabel">
         <div class="options scroll" id="facet-cities"></div>
       </section>
 
       <section class="facet" data-facet="hechsherim">
         <div class="facet-head">
-          <h2>כשרות</h2>
-          <button type="button" class="clear-facet" data-clear="hechsherim">נקה</button>
+          <h2 data-i18n="facet.hechsherim">כשרות</h2>
+          <button type="button" class="clear-facet" data-clear="hechsherim" data-i18n="clear">נקה</button>
         </div>
         <div class="options scroll" id="facet-hechsherim"></div>
       </section>
 
-      <button type="button" id="reset-all">אפס את כל הסינונים</button>
+      <button type="button" id="reset-all" data-i18n="reset">אפס את כל הסינונים</button>
 
       <p id="meta"></p>
     </div>
@@ -90,11 +97,11 @@
   <main id="map-wrap">
     <div id="map"></div>
 
-    <div id="status" role="status">טוען נתונים…</div>
+    <div id="status" role="status" data-i18n="status.loading">טוען נתונים…</div>
 
     <section id="unmapped" hidden>
       <button type="button" id="unmapped-toggle" aria-expanded="false" aria-controls="unmapped-list">
-        <span id="unmapped-count"></span> ללא מיקום מדויק
+        <span id="unmapped-label"></span>
       </button>
       <ul id="unmapped-list" hidden></ul>
     </section>

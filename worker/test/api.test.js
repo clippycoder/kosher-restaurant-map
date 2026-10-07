@@ -127,7 +127,7 @@ test('missing required fields are rejected with per-field errors, without spendi
 test('a malformed phone is refused outright with a hint, not held', async () => {
   const r = await submit({ ...VALID, phone: '050-56800688' });
   assert.equal(r.status, 422);
-  assert.equal(r.body.fields.phone, 'מספר טלפון לא תקין');
+  assert.equal(r.body.fields.phone, 'bad_phone');
   const w = await submit({ ...VALID, whatsapp: '08-923-220' });
   assert.equal(w.status, 422, 'optional phones are checked too');
   const adm = await call('GET', '/api/admin/submissions?status=all', { admin: true, origin: null });
