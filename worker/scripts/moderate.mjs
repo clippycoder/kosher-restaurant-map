@@ -8,6 +8,8 @@
  * (service "kosher-map-admin-token"). SUBMISSIONS_API and ADMIN_TOKEN override
  * them, e.g. SUBMISSIONS_API=http://localhost:8787 against `wrangler dev`.
  *
+ *   pending                                everything waiting for you: held listings,
+ *                                          corrections and open reports, in one go
  *   list                                   what's waiting for your review (held), with why
  *   list mine                              all your listings, newest first, with their status
  *   list published|rejected                only those
@@ -113,6 +115,34 @@ const id = () => {
 const note = () => args.slice(1).join(' ') || undefined;
 
 switch (cmd) {
+  case 'pending': {
+    const [{ submissions }, { edits }, { reports }] = await Promise.all([
+      api('GET', 'submissions?status=held&limit=200'),
+      api('GET', 'edits?status=pending&limit=200'),
+      api('GET', 'reports?status=open&limit=200'),
+    ]);
+    const held = submissions.filter((s) => !s.shadows);
+    const shadowsHeld = submissions.filter((s) => s.shadows);
+    console.log(`New restaurants held for review: ${held.length}${held.length ? '   (publish / reject <id>)' : ''}`);
+    held.forEach((s) => printSubmission(s));
+    if (shadowsHeld.length) {
+      console.log(`\nCorrected בהשגחה listings that בהשגחה removed: ${shadowsHeld.length}   (publish <id> keeps it as ours)`);
+      shadowsHeld.forEach((s) => printSubmission(s));
+    }
+    console.log(`\nCorrections waiting: ${edits.length}${edits.length ? '   (accept / decline <id>)' : ''}`);
+    for (const e of edits) {
+      console.log(`#${e.id} restaurant ${e.restaurant} (${e.createdAt})`);
+      for (const f of e.flags) console.log(`    ! ${flagText(f)}`);
+      for (const f of e.fields.filter((x) => x.status === 'pending')) console.log(`    ${f.field}: "${f.base}" -> "${f.value}"`);
+    }
+    console.log(`\nOpen reports: ${reports.length}${reports.length ? '   (resolve / dismiss <id>)' : ''}`);
+    for (const r of reports) {
+      console.log(`#${r.id} restaurant ${r.restaurant}: ${r.kind}${r.details ? ` — ${r.details}` : ''} (${r.createdAt})`);
+    }
+    const total = held.length + shadowsHeld.length + edits.length + reports.length;
+    console.log(`\n${total ? `${total} waiting for you.` : 'Nothing waiting for you.'}`);
+    break;
+  }
   case 'list': {
     const which = args[0] || 'held';
     if (!['mine', 'shadows', 'held', 'published', 'rejected', 'all'].includes(which)) {
@@ -262,7 +292,7 @@ switch (cmd) {
     break;
   }
   default:
-    console.log('commands: list, show, publish, reject, edit, delete, edits, accept, decline, ' +
+    console.log('commands: pending, list, show, publish, reject, edit, delete, edits, accept, decline, ' +
       'versions, unversion, correct, sync, rebuild, reports, resolve, dismiss');
     process.exit(cmd ? 2 : 0);
 }

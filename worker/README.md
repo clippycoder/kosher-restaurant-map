@@ -123,6 +123,7 @@ Region is not asked; the build derives it from the city.
 # No setup: it talks to the live worker and reads the admin token from the
 # macOS Keychain. (SUBMISSIONS_API / ADMIN_TOKEN override them, e.g.
 # SUBMISSIONS_API=http://localhost:8787 against `npm run dev`.)
+node scripts/moderate.mjs pending              # everything waiting for you, in one go
 node scripts/moderate.mjs list                 # waiting for your review, with why
 node scripts/moderate.mjs list mine            # all your listings, newest first, with status
 node scripts/moderate.mjs show 12
