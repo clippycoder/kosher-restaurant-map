@@ -134,6 +134,7 @@ node scripts/moderate.mjs decline 7
 node scripts/moderate.mjs versions             # corrections held in shadows of jdn listings
 node scripts/moderate.mjs unversion 2699 phone # drop one; jdn's shows again
 node scripts/moderate.mjs sync                 # bring shadows into step with jdn now
+node scripts/moderate.mjs rebuild --wait       # put what you published on the map now
 node scripts/moderate.mjs reports              # open reports
 node scripts/moderate.mjs resolve 3 "hid it"
 ```

@@ -129,7 +129,8 @@ worker is unreachable so a blip never drops community restaurants.
   checks community records are in Hebrew with jdn's exact hechsher spellings.
 
 A new submission therefore appears with the next daily build (03:00 UTC), or
-at once with `gh workflow run build.yml`.
+at once with `node worker/scripts/moderate.mjs rebuild --wait` (or
+`gh workflow run build.yml`, or "Run workflow" on the Actions tab).
 
 The form states on the page what it stores: the submitted details, private
 phones visible only to the moderator, and a one-way hash of the IP kept 30 days.
