@@ -1,17 +1,17 @@
 {
-  "generated": "2026-10-07T23:41:10.572Z",
+  "generated": "2026-10-07T23:48:03.926Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
-    "total": 645,
-    "mapped": 645,
+    "total": 646,
+    "mapped": 646,
     "unmapped": 0,
-    "community": 4
+    "community": 5
   },
   "facets": {
     "cities": [
       {
         "name": "ירושלים",
-        "count": 152,
+        "count": 153,
         "area": "ירושלים"
       },
       {
@@ -537,7 +537,7 @@
       },
       {
         "name": "ירושלים",
-        "count": 194
+        "count": 195
       },
       {
         "name": "צפון",
@@ -583,7 +583,7 @@
       },
       {
         "name": "רבנות ירושלים מהדרין",
-        "count": 20
+        "count": 21
       },
       {
         "name": "קהילות",
@@ -609,7 +609,7 @@
     "types": [
       {
         "name": "חלבי",
-        "count": 341
+        "count": 342
       },
       {
         "name": "בשרי",
@@ -2975,6 +2975,25 @@
       "precision": "address",
       "lat": 31.7946393,
       "lon": 35.2086222
+    },
+    {
+      "id": "c23",
+      "source": "community",
+      "name": "בית מאפה יהודה - Gagou de Paris",
+      "address": "המלך ג'ורג' 14",
+      "cityRaw": "ירושלים",
+      "city": "ירושלים",
+      "area": "ירושלים",
+      "kashrut": "רבנות ירושלים מהדרין",
+      "type": "חלבי",
+      "phone": "026250343",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-07T23:44:36.174Z",
+      "verified": false,
+      "precision": "address",
+      "lat": 31.782063,
+      "lon": 35.216782
     },
     {
       "id": 2500,

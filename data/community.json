@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-10-07T23:39:51.245Z",
+  "fetched": "2026-10-07T23:48:03.890Z",
   "submissions": [
     {
       "id": "c1",
@@ -54,6 +54,20 @@
       "type": "חלבי",
       "hechsher": "קהילות",
       "submittedAt": "2026-10-07T23:38:30.408Z",
+      "confirmations": 0,
+      "verified": false
+    },
+    {
+      "id": "c23",
+      "name": "בית מאפה יהודה - Gagou de Paris",
+      "address": "המלך ג'ורג' 14",
+      "city": "ירושלים",
+      "type": "חלבי",
+      "hechsher": "רבנות ירושלים מהדרין",
+      "phone": "026250343",
+      "lat": 31.782063,
+      "lon": 35.216782,
+      "submittedAt": "2026-10-07T23:44:36.174Z",
       "confirmations": 0,
       "verified": false
     }
