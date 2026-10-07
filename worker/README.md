@@ -1,7 +1,7 @@
 # Community submissions API
 
-Live at **https://kosher-map-submissions.clippycoder.workers.dev** (not yet used by
-the site; the captcha secret is still to be set, so public posts refuse with 503).
+Live at **https://kosher-map-submissions.clippycoder.workers.dev**; the site's
+forms and the daily build use it.
 
 Our own form and database for adding restaurants, editing jdn's, and reporting problems, kept
 apart from rest.jdn.co.il: nothing is written back upstream, and upstream data

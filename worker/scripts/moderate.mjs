@@ -17,6 +17,7 @@
  *   versions                               our corrections to jdn listings (their shadows)
  *   sync                                   bring shadows into step with jdn now (also nightly)
  *   unversion <restaurant> [field]         drop our value(s); jdn's show again
+ *   correct <jdn-id> field=value...        correct a jdn listing yourself (into its shadow)
  *
  *   reports [open|resolved|dismissed|all]  default: open
  *   resolve <report-id> [note]
@@ -137,6 +138,17 @@ switch (cmd) {
     }
     break;
   }
+  case 'correct': {
+    if (!/^\d+$/.test(args[0] || '')) {
+      console.error('needs a jdn listing id');
+      process.exit(2);
+    }
+    const fields = Object.fromEntries(args.slice(1).filter((a) => a.includes('='))
+      .map((a) => [a.slice(0, a.indexOf('=')), a.slice(a.indexOf('=') + 1)]));
+    const r = await api('POST', `versions/${args[0]}`, fields);
+    console.log(`jdn ${r.restaurant}: ${r.applied.length ? `corrected ${r.applied.join(', ')}` : 'nothing changed'}`);
+    break;
+  }
   case 'sync':
     console.log(await api('POST', 'sync'));
     break;
@@ -165,6 +177,6 @@ switch (cmd) {
   }
   default:
     console.log('commands: list, show, publish, reject, edit, delete, edits, accept, decline, ' +
-      'versions, unversion, sync, reports, resolve, dismiss');
+      'versions, unversion, correct, sync, reports, resolve, dismiss');
     process.exit(cmd ? 2 : 0);
 }

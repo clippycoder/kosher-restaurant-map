@@ -839,3 +839,26 @@ test('confirmations: thirty a day per person', async () => {
   for (let i = 1; i <= 30; i++) assert.equal((await confirmIt(`c${i}`, '1.1.1.1')).status, 201);
   assert.equal((await confirmIt('c31', '1.1.1.1')).status, 429);
 });
+
+test('moderator corrects a jdn listing directly, into its shadow', async () => {
+  const r = await call('POST', '/api/admin/versions/2699', {
+    admin: true, origin: null, body: { city: 'בית שמש', address: 'יגאל אלון 2' },
+  });
+  assert.deepEqual(r.body, { ok: true, restaurant: '2699', applied: ['address', 'city'] });
+  const v = (await versions())['2699'];
+  assert.equal(v.city.value, 'בית שמש');
+  assert.equal(v.city.base, 'ירושלים');
+  assert.equal((await call('POST', '/api/admin/versions/2699', { admin: true, origin: null, body: { city: 'בית שמש' } })).body.applied.length, 0, 'no-op');
+  assert.equal((await call('POST', '/api/admin/versions/2699', { admin: true, origin: null, body: { phone: 'nope' } })).status, 422);
+  assert.equal((await call('POST', '/api/admin/versions/424242', { admin: true, origin: null, body: { city: 'חיפה' } })).status, 404);
+  assert.equal((await call('POST', '/api/admin/versions/2699', { origin: null, body: { city: 'חיפה' } })).status, 401);
+});
+
+test('a jdn listing with no city can be given one (base is the empty value)', async () => {
+  DATASET.restaurants.push({ id: 2199, name: 'בורגרס בר – אילת ביג', address: 'הסתת, אילת', city: '', type: 'בשרי', kashrut: 'בית יוסף', phone: '', modified: 'x' });
+  resetDatasetCache();
+  const r = await call('POST', '/api/admin/versions/2199', { admin: true, origin: null, body: { city: 'אילת' } });
+  assert.deepEqual(r.body.applied, ['city']);
+  assert.deepEqual((await versions())['2199'].city, { value: 'אילת', base: '', acceptedAt: (await versions())['2199'].city.acceptedAt });
+  assert.equal((await syncShadows(env)).dropped, 0, 'still empty upstream: the correction stays');
+});

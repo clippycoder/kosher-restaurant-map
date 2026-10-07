@@ -27,7 +27,7 @@
  * and every new edit of a listing first retires what jdn has overtaken.
  */
 
-import { EDIT_FIELDS, EDITABLE, sameValue } from '../../public/forms/fields.js';
+import { EDIT_FIELDS, EDITABLE, sameValue, validate } from '../../public/forms/fields.js';
 import { jdnRecords, asFields } from './dataset.js';
 import { spamFlags } from './screen.js';
 import { intake } from './intake.js';
@@ -330,6 +330,31 @@ export async function adminEdits(request, env, url) {
         }
       }
       return json({ versions });
+    }
+    // The moderator corrects a jdn listing directly: { city: "...", ... }. Same
+    // checks as any correction; it goes into the listing's shadow at once.
+    if (request.method === 'POST' && restaurant && !field) {
+      const body = await readBody(request);
+      if (body.error) return json({ error: body.error }, body.status);
+      const fields = EDIT_FIELDS.filter((f) => f.key !== 'restaurant' && EDITABLE.includes(f.key));
+      const v = validate(body.value, fields);
+      if (Object.keys(v.errors).length) return json({ error: 'invalid', fields: v.errors }, 422);
+      const now = new Date().toISOString();
+      let L;
+      try {
+        L = await listing(env, restaurant);
+      } catch (err) {
+        console.error('listing', err);
+        return json({ error: 'dataset unavailable' }, 503);
+      }
+      if (!L) return json({ error: 'not found' }, 404);
+      const applied = [];
+      for (const [f, value] of Object.entries(v.public)) {
+        if (sameValue(f, value, L.shown[f] ?? '')) continue;
+        await acceptValue(env, await listing(env, restaurant), f, value, now);
+        applied.push(f);
+      }
+      return json({ ok: true, restaurant, applied });
     }
     if (request.method === 'DELETE' && restaurant) {
       const shadow = await env.DB.prepare('SELECT * FROM submissions WHERE shadows = ?').bind(restaurant).first();
