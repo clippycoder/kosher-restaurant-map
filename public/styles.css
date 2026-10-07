@@ -316,6 +316,8 @@ button:focus-visible {
   font-weight: 600;
 }
 .pop .desc { margin: 0 0 8px; font-size: 13px; color: var(--text); }
+.pop .badge.updated { background: #fff4dd; color: #7a4b00; }
+.pop .edited-mark { margin-inline-start: 5px; color: #b0761a; font-size: 11px; cursor: help; }
 .pop .update-link {
   display: block;
   margin-top: 9px;

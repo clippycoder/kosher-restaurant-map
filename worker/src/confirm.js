@@ -2,10 +2,13 @@
  * "Is this correct?" on community listings. One click, no captcha: each
  * person (salted IP fingerprint) counts once per listing, with daily limits.
  * At CONFIRMATIONS_NEEDED distinct people the listing is verified and the
- * question stops being asked. Someone with many internet connections could
+ * question stops being asked. Whoever submitted the listing (same
+ * fingerprint) can't confirm it; the popup doesn't ask them. Fingerprints
+ * change with the network and are cleared after 30 days, so this catches the
+ * same person on the same connection, not every case. Someone with many internet connections could
  * fake confirmations; the stakes (a button disappearing) are low.
  *
- *   GET  /api/confirmations/c<id>   { count, needed, verified, mine }
+ *   GET  /api/confirmations/c<id>   { count, needed, verified, mine, own }
  *   POST /api/confirmations         { restaurant: "c<id>" } -> the same, after counting
  */
 
@@ -20,7 +23,7 @@ const REF = /^c\d{1,9}$/;
 async function communityListing(env, ref) {
   if (!REF.test(ref || '')) return null;
   return env.DB.prepare(
-    "SELECT id, verified_at FROM submissions WHERE id = ? AND shadows IS NULL AND status = 'published'",
+    "SELECT id, verified_at, client_hash FROM submissions WHERE id = ? AND shadows IS NULL AND status = 'published'",
   ).bind(Number(ref.slice(1))).first();
 }
 
@@ -33,7 +36,8 @@ async function state(env, ref, row, clientHash) {
   const mine = !!(await env.DB.prepare(
     'SELECT 1 AS x FROM confirmations WHERE restaurant = ? AND client_hash = ?',
   ).bind(ref, clientHash).first());
-  return { restaurant: ref, count: n, needed: CONFIRMATIONS_NEEDED, verified: !!row.verified_at, mine };
+  const own = !!row.client_hash && row.client_hash === clientHash;
+  return { restaurant: ref, count: n, needed: CONFIRMATIONS_NEEDED, verified: !!row.verified_at, mine, own };
 }
 
 export async function confirmationState(request, env, cors, ref) {
@@ -53,6 +57,10 @@ export async function confirm(request, env, cors) {
 
   const clientHash = await fingerprint(env, request);
   if (row.verified_at) return json(await state(env, ref, row, clientHash), 200, cors);
+  // Nobody vouches for their own submission.
+  if (row.client_hash && row.client_hash === clientHash) {
+    return json({ error: 'own listing', ...(await state(env, ref, row, clientHash)) }, 403, cors);
+  }
 
   const now = new Date();
   const dayAgo = new Date(now.getTime() - 24 * 3600 * 1000).toISOString();

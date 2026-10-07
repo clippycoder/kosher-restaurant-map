@@ -104,25 +104,42 @@
   // rendering: markers
   // -------------------------------------------------------------------------
 
+  // A ✎ beside a detail the community corrected on a בהשגחה listing.
+  const editedMark = () => el('span', {
+    class: 'edited-mark', text: '✎', title: t('pop.editedField'), 'aria-label': t('pop.editedField'),
+  });
+
   function popupFor(r) {
+    // Which details of this בהשגחה listing come from community corrections.
+    const edited = new Set(r.source === 'community' ? [] : r.edited || []);
     const dl = el('dl');
-    const row = (label, value) => {
+    const row = (label, value, fields) => {
       if (!value) return;
       dl.appendChild(el('dt', { text: label }));
       // dir=auto: Hebrew data reads right to left even on the English page.
-      dl.appendChild(el('dd', { text: value, dir: 'auto' }));
+      const dd = el('dd', { text: value, dir: 'auto' });
+      if (fields.some((f) => edited.has(f))) dd.appendChild(editedMark());
+      dl.appendChild(dd);
     };
-    row(t('pop.address'), [r.address, r.city].filter(Boolean).join(', '));
-    row(t('pop.kashrut'), r.kashrut);
-    row(t('pop.type'), r.type);
-    row(t('pop.phone'), r.phone);
-    row(t('pop.hours'), r.hours);
+    row(t('pop.address'), [r.address, r.city].filter(Boolean).join(', '), ['address', 'city']);
+    row(t('pop.kashrut'), r.kashrut, ['hechsher']);
+    row(t('pop.type'), r.type, ['type']);
+    row(t('pop.phone'), r.phone, ['phone']);
+    row(t('pop.hours'), r.hours, ['hours']);
 
-    const box = el('div', { class: 'pop' }, [el('h3', { text: r.name, dir: 'auto' })]);
+    const title = el('h3', { text: r.name, dir: 'auto' });
+    if (edited.has('name')) title.appendChild(editedMark());
+    const box = el('div', { class: 'pop' }, [title]);
     if (r.source === 'community') {
       box.appendChild(el('p', { class: 'badge', text: t('pop.community') }));
+    } else if (edited.size) {
+      box.appendChild(el('p', { class: 'badge updated', text: t('pop.updated') }));
     }
-    if (r.description) box.appendChild(el('p', { class: 'desc', text: r.description, dir: 'auto' }));
+    if (r.description) {
+      const desc = el('p', { class: 'desc', text: r.description, dir: 'auto' });
+      if (edited.has('description')) desc.appendChild(editedMark());
+      box.appendChild(desc);
+    }
 
     const imgSrc = safeUrl(r.image);
     if (imgSrc) {
@@ -193,7 +210,8 @@
     ]);
 
     const show = (s) => {
-      if (s.verified && !s.mine) { box.remove(); return; }
+      // Not asked of whoever added it, nor once verified (unless they confirmed).
+      if (s.own || (s.verified && !s.mine)) { box.remove(); return; }
       if (s.mine) {
         box.replaceChildren(el('p', { class: 'confirm-ask', text: t('confirm.thanks') }), note);
       }
@@ -213,8 +231,9 @@
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ restaurant: String(r.id) }),
         });
+        const s = await res.json().catch(() => ({}));
+        if (s.own) { box.remove(); return; }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const s = await res.json();
         show({ ...s, mine: true, verified: false });
       } catch {
         yes.disabled = false;

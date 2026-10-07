@@ -785,10 +785,10 @@ const confirmIt = (ref, ip) => call('POST', '/api/confirmations', { body: { rest
 const confState = (ref, ip) => call('GET', `/api/confirmations/${ref}`, { ip });
 
 test('confirmations: five different people verify a community listing; one person counts once', async () => {
-  await submit(VALID); // c1
+  await submit(VALID, { ip: '9.0.0.1' }); // c1, from someone who won't confirm it
   let r = await confirmIt('c1', '1.1.1.1');
   assert.equal(r.status, 201);
-  assert.deepEqual(r.body, { restaurant: 'c1', count: 1, needed: 5, verified: false, mine: true });
+  assert.deepEqual(r.body, { restaurant: 'c1', count: 1, needed: 5, verified: false, mine: true, own: false });
   r = await confirmIt('c1', '1.1.1.1');
   assert.equal(r.body.count, 1, 'the same person twice is one');
   assert.equal((await confState('c1', '1.1.1.1')).body.mine, true);
@@ -814,7 +814,7 @@ test('confirmations: only published community listings', async () => {
 });
 
 test('confirmations: an accepted correction starts the count again', async () => {
-  await submit(VALID);
+  await submit(VALID, { ip: '9.0.0.1' });
   for (const ip of ['1.1.1.1', '2.2.2.2', '3.3.3.3']) await confirmIt('c1', ip);
   for (const ip of ['7.7.7.7', '8.8.8.8']) await edit({ restaurant: 'c1', phone: '02-999-9999' }, ip);
   const s = (await confState('c1', '1.1.1.1')).body;
@@ -823,7 +823,7 @@ test('confirmations: an accepted correction starts the count again', async () =>
 });
 
 test('confirmations: fingerprints are purged after 30 days like everywhere else', async () => {
-  await submit(VALID);
+  await submit(VALID, { ip: '9.0.0.1' });
   await confirmIt('c1', '1.1.1.1');
   await purgeClientHashes(env, Date.now() + 31 * 24 * 3600 * 1000);
   assert.equal(env.DB.raw.prepare('SELECT client_hash FROM confirmations').get().client_hash, null);
@@ -873,4 +873,15 @@ test('the map shows our corrections; the worker still compares against jdn\'s ow
   assert.deepEqual(await syncShadows(env), { refreshed: 1, dropped: 0, held: 0, released: 0 },
     'the correction is not mistaken for jdn having changed the phone');
   assert.equal((await versions())['2699'].phone.value, '029999999');
+});
+
+test('confirmations: the submitter can\'t confirm their own listing', async () => {
+  await submit(VALID, { ip: '7.7.7.7' }); // c1
+  const own = await confirmIt('c1', '7.7.7.7');
+  assert.equal(own.status, 403);
+  assert.equal(own.body.own, true);
+  assert.equal(own.body.count, 0, 'nothing counted');
+  assert.equal((await confState('c1', '7.7.7.7')).body.own, true, 'the popup is told not to ask them');
+  assert.equal((await confState('c1', '8.8.8.8')).body.own, false);
+  assert.equal((await confirmIt('c1', '8.8.8.8')).status, 201, 'anyone else can');
 });
