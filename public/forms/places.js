@@ -13,6 +13,26 @@ const ISRAEL_BBOX = '34.2,29.4,35.95,33.4';
 const DEBOUNCE_MS = 250;
 const MIN_CHARS = 2;
 
+// Transport stops and junctions: OSM names them after the streets they sit
+// on ("שדרות יגאל אלון/3855"), so they crowd out the street itself, and a
+// restaurant's address is never one of them.
+const NOT_ADDRESSES = new Set(['bus_stop', 'motorway_junction', 'platform', 'stop', 'stop_position',
+  'station', 'halt', 'tram_stop', 'bus_station', 'traffic_signals', 'crossing']);
+
+// "Street", "St", "Road", "רחוב"... are not part of OSM's names (it has
+// שדרות יגאל אלון, "Yigal Alon Boulevard"), and with them in the query Photon
+// often finds nothing at all. Removed before searching.
+const STREET_WORDS = /(^|[\s,])(?:street|st|road|rd|avenue|ave|boulevard|blvd|lane|ln|רחוב|רח['׳]?)\.?(?=[\s,]|$)/giu;
+// Only in a street address (one with a number): "Boulevard Mall" is a name.
+export const cleanQuery = (q) => (!/\d/.test(q) ? q.trim() : q
+  .replace(STREET_WORDS, '$1')
+  .replace(/\s*,\s*/g, ', ')
+  .replace(/\s{2,}/g, ' ')
+  .replace(/^[\s,]+|[\s,]+$/g, ''));
+
+/** The house number typed into an address query ("Yigal Alon 6, Beit Shemesh" -> "6"). */
+export const typedNumber = (q) => (q.match(/(?:^|[\s,])(\d{1,4}[א-ת]?)(?=[\s,]|$)/u) || [])[1] || '';
+
 // Places that are themselves somewhere to eat; picking one can fill the name.
 const EATERIES = new Set(['restaurant', 'cafe', 'fast_food', 'food_court', 'ice_cream', 'bakery',
   'pastry', 'deli', 'confectionery']);
@@ -50,6 +70,7 @@ export function toPlace(feature, mode = 'address') {
     return { kind: 'settlement', label: name, sub: '', city: name, lat, lon };
   }
   if (isSettlement) return null; // a town belongs in the city field, not the address
+  if (NOT_ADDRESSES.has(p.osm_value) || p.osm_key === 'public_transport' || p.osm_key === 'railway') return null;
 
   const city = townOf(p);
   const street = p.street ? [p.street, p.housenumber].filter(Boolean).join(' ') : '';
@@ -75,6 +96,30 @@ export function toPlace(feature, mode = 'address') {
     lat,
     lon,
   };
+}
+
+/**
+ * OSM has house numbers for only part of Israel (in Beit Shemesh, 186 of 476
+ * streets; on שדרות יגאל אלון just number 3). When the street is found but not
+ * the number typed, offer the street *with* that number -- marked as not on the
+ * map, and without coordinates, so the pin is placed later like any address.
+ * Exact house matches stay first.
+ */
+function withTypedNumber(places, n) {
+  if (!n) return places;
+  const exact = places.filter((p) => p.kind === 'address' && p.address.endsWith(` ${n}`));
+  const numbered = places
+    .filter((p) => p.kind === 'street')
+    .filter((p) => !exact.some((e) => e.address === `${p.label} ${n}` && e.city === p.city))
+    .map((p) => ({
+      kind: 'numbered',
+      address: `${p.label} ${n}`,
+      label: `${p.label} ${n}`,
+      sub: [p.city, window.i18n.t('places.noNumber')].filter(Boolean).join(' · '),
+      city: p.city,
+    }));
+  const rest = places.filter((p) => !exact.includes(p) && p.kind !== 'street');
+  return [...exact, ...numbered, ...rest];
 }
 
 let seq = 0;
@@ -171,7 +216,7 @@ export function attachPlaces(input, {
     if (!place) return;
     close();
     onPick(place);
-    // A street was picked: keep going, they still need the house number.
+    // A bare street was picked: keep going, they still need the house number.
     if (place.kind === 'street') {
       input.focus();
       input.setSelectionRange(input.value.length, input.value.length);
@@ -228,6 +273,8 @@ export function attachPlaces(input, {
   async function search(q) {
     // The debounce may fire after they've moved on; then there's nothing to show.
     if (document.activeElement !== input) return;
+    const typed = q;
+    if (mode === 'address') q = cleanQuery(q) || q;
     const b = bias();
     const key = `${q}|${b ? `${b.lat.toFixed(2)},${b.lon.toFixed(2)}` : ''}`;
     const mine = local(q);
@@ -243,7 +290,9 @@ export function attachPlaces(input, {
       if (!res.ok) throw new Error(`photon ${res.status}`);
       const data = await res.json();
       const seen = new Set(mine.map(same));
-      const places = [...mine, ...(data.features || []).map((f) => toPlace(f, mode))].filter((p, i) => {
+      let found = (data.features || []).map((f) => toPlace(f, mode));
+      if (mode === 'address') found = withTypedNumber(found.filter(Boolean), typedNumber(q));
+      const places = [...mine, ...found].filter((p, i) => {
         if (i < mine.length) return true;
         if (!p) return false;
         const k = same(p);
@@ -254,7 +303,7 @@ export function attachPlaces(input, {
       cache.set(key, places);
       // Only if they're still here: a slow answer must not pop open under a
       // field they've since left.
-      if (input.value.trim() === q && document.activeElement === input) render(places);
+      if (input.value.trim() === typed && document.activeElement === input) render(places);
     } catch (err) {
       // Unreachable: keep whatever we know locally, else it's a plain text box.
       if (err.name !== 'AbortError') (mine.length && document.activeElement === input ? render(mine) : close());

@@ -95,6 +95,15 @@ export function spamFlags(data) {
     const word = listedWord(v);
     if (word) flags.push({ kind: 'spam', field, reason: word });
   }
+  // Places are stored in Hebrew, as on the map. The form converts what it can
+  // (picked suggestions, English city names); an address or city with no
+  // Hebrew at all waits for the moderator to put it in Hebrew. None of the
+  // 641 live listings has one.
+  for (const field of ['address', 'city'].filter((f) => f in data)) {
+    if (data[field] && !/[\u05D0-\u05EA]/.test(data[field])) {
+      flags.push({ kind: 'language', field, reason: 'not in Hebrew' });
+    }
+  }
   if ('address' in data && 'name' in data) {
     const reason = badAddress(data);
     if (reason) flags.push({ kind: 'spam', field: 'address', reason });

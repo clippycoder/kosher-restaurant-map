@@ -121,6 +121,7 @@
       'dupes.show': 'הצגה במפה',
       'city.converted': 'שם העיר נשמר בעברית: {city}',
       'places.searching': 'מחפש…',
+      'places.noNumber': 'מספר הבית לא מופיע במפה',
       'places.credit': 'הצעות: Photon · © OpenStreetMap',
       submit: 'שליחה',
       'st.fix': 'יש לתקן את השדות המסומנים.',
@@ -136,9 +137,7 @@
         'למניעת ספאם נשמר מזהה מוצפן חד־כיווני של כתובת ה־IP, ונמחק אחרי 30 יום. ' +
         'כתובות מוצעות בעזרת Photon (OpenStreetMap), שמקבל את מה שמקלידים בשדות הכתובת והעיר; ' +
         'בדיקת האבטחה של Cloudflare Turnstile.',
-      'done.title': 'תודה!',
-      'done.held': 'ההגשה התקבלה ותיבדק לפני שתופיע במפה.',
-      'done.published': 'המסעדה תופיע במפה בעדכון הבא של האתר (פעם ביום).',
+      'done.title': 'תודה על ההגשה!',
       'done.again': 'הוספת מסעדה נוספת',
 
       'field.name': 'שם המסעדה',
@@ -228,6 +227,7 @@
       'dupes.show': 'Show on map',
       'city.converted': 'City saved in Hebrew, as on the map: {city}',
       'places.searching': 'Searching…',
+      'places.noNumber': 'house number not on the map',
       'places.credit': 'Suggestions: Photon · © OpenStreetMap',
       submit: 'Submit',
       'st.fix': 'Please fix the highlighted fields.',
@@ -243,9 +243,7 @@
         'To prevent spam, a one-way hash of your IP address is kept and deleted after 30 days. ' +
         'Address suggestions come from Photon (OpenStreetMap), which receives what you type into the address and city fields; ' +
         'the security check is Cloudflare Turnstile.',
-      'done.title': 'Thank you!',
-      'done.held': 'Your submission was received and will be reviewed before it appears on the map.',
-      'done.published': 'The restaurant will appear on the map with the site\'s next update (once a day).',
+      'done.title': 'Thanks for your submission!',
       'done.again': 'Add another restaurant',
 
       'field.name': 'Restaurant name',

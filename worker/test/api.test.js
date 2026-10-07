@@ -362,6 +362,17 @@ test('spam rules leave ordinary Hebrew and English names alone', () => {
   assert.ok(spamFlags({ name: 'Ελληνικό', address: 'x 1', city: 'ירושלים' }).length, 'Greek is held');
 });
 
+test('a place not in Hebrew is held for the moderator; an English restaurant name is fine', async () => {
+  const city = await submit({ ...VALID, city: 'Beit Shemesh' });
+  assert.equal(city.body.status, 'held');
+  const address = await submit({ ...VALID, name: 'אחר', phone: '02-777-0000', address: 'Big Beit Shemesh, Sderot Yigal Alon' }, { ip: '8.8.8.8' });
+  assert.equal(address.body.status, 'held');
+  const adm = await call('GET', '/api/admin/submissions/1', { admin: true, origin: null });
+  assert.deepEqual(adm.body.flags.map((f) => `${f.field}:${f.reason}`), ['city:not in Hebrew']);
+  const name = await submit({ ...VALID, name: "Zalman's", phone: '02-777-1111' }, { ip: '9.9.9.9' });
+  assert.equal(name.body.status, 'published');
+});
+
 test('Chinese, Japanese, Korean and Cyrillic names are allowed', () => {
   for (const name of ['寿司 Sushi', 'すし屋', 'ラーメン', '김치 하우스', 'Ресторан Пушкин']) {
     assert.deepEqual(spamFlags({ name, address: 'יפו 50', city: 'ירושלים' }), [], name);

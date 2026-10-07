@@ -366,7 +366,7 @@ async function submit(e) {
 
   // Tokens are single-use: get a fresh one after every completed attempt.
   if (turnstileId !== null) window.turnstile.reset(turnstileId);
-  if (res.status === 201) return done(out.status);
+  if (res.status === 201) return done();
 
   button.disabled = false;
   if (res.status === 422 && out.fields) {
@@ -382,12 +382,11 @@ async function submit(e) {
   }
 }
 
-function done(status) {
-  const held = status === 'held';
+// The same thanks whether it published or was held for review.
+function done() {
   $('add-form').hidden = true;
   const box = $('done');
   box.querySelector('h2').textContent = t('done.title');
-  box.querySelector('p').textContent = held ? t('done.held') : t('done.published');
   box.hidden = false;
   box.querySelector('h2').focus();
 }

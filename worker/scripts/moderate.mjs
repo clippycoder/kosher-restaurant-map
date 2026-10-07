@@ -52,7 +52,8 @@ const flagText = (f) => (f.kind === 'duplicate'
 
 function printSubmission(s, full = false) {
   const d = s.data;
-  console.log(`#${s.id} [${s.status}] ${d.name} — ${d.address}, ${d.city} · ${d.type} · ${d.hechsher} · ${d.phone}`);
+  console.log(`#${s.id} [${s.status}] ${d.name} — ${d.address}, ${d.city} · ` +
+    [d.type, d.hechsher, d.phone].filter(Boolean).join(' · '));
   for (const f of s.flags) console.log(`    ! ${flagText(f)}`);
   if (!full) return;
   for (const [k, v] of Object.entries(d)) console.log(`    ${k}: ${v}`);
