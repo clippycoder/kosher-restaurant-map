@@ -109,6 +109,11 @@ value, or by the moderator (`moderate.mjs edits`). Community and jdn listings ar
 corrected the same way; a corrected jdn listing gets a *shadow*, our own listing
 that follows it (see `worker/README.md`). The forms share `public/forms/kit.js`.
 
+**"Is this correct?"** Popups of community listings ask it until five different
+people (one per fingerprint, no captcha, 30 a day each) have said yes; then the
+listing is verified and the question stops. "No" opens the update page. An
+accepted correction starts the count again, since it changes what was confirmed.
+
 **Reaching the map.** The daily build reads the worker's two public lists --
 published submissions (`/api/published`) and accepted edits of jdn listings
 (`/api/versions`) -- and keeps a copy in `data/community.json`, used if the

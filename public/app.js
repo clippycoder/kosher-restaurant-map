@@ -168,7 +168,59 @@
     // Closed, wrong details, misplaced pin: our own update/report page.
     const langParam = new URLSearchParams(location.search).get('lang');
     const updateUrl = `update.html?id=${encodeURIComponent(r.id)}${langParam ? `&lang=${encodeURIComponent(langParam)}` : ''}`;
+    if (r.source === 'community' && !r.verified) box.appendChild(confirmBox(r, updateUrl));
     box.appendChild(el('a', { class: 'update-link', href: updateUrl, text: t('pop.update') }));
+    return box;
+  }
+
+  // The worker's address lives in the form modules' config; loaded on first need.
+  let apiBase = null;
+  const api = async () => (apiBase ??= (await import('./forms/config.js')).API_BASE);
+
+  /**
+   * "Is this correct?" on a community listing, until enough different people
+   * have said yes. On opening it checks the live count (the map's data is
+   * rebuilt once a day), so someone who already confirmed sees their thanks.
+   */
+  function confirmBox(r, updateUrl) {
+    const yes = el('button', { type: 'button', class: 'confirm-yes', text: t('confirm.yes') });
+    const no = el('a', { class: 'confirm-no', href: updateUrl, text: t('confirm.no') });
+    const note = el('p', { class: 'confirm-note' });
+    const box = el('div', { class: 'confirm' }, [
+      el('p', { class: 'confirm-ask', text: t('confirm.ask') }),
+      el('div', { class: 'confirm-actions' }, [yes, no]),
+      note,
+    ]);
+
+    const show = (s) => {
+      if (s.verified && !s.mine) { box.remove(); return; }
+      if (s.mine) {
+        box.replaceChildren(el('p', { class: 'confirm-ask', text: t('confirm.thanks') }), note);
+      }
+      note.textContent = s.count ? t('confirm.count', { n: s.count, needed: s.needed }) : '';
+    };
+
+    api().then(async (base) => {
+      const res = await fetch(`${base}/api/confirmations/${encodeURIComponent(r.id)}`);
+      if (res.ok) show(await res.json());
+    }).catch(() => { /* the question still works from the map's own data */ });
+
+    yes.addEventListener('click', async () => {
+      yes.disabled = true;
+      try {
+        const res = await fetch(`${await api()}/api/confirmations`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ restaurant: String(r.id) }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const s = await res.json();
+        show({ ...s, mine: true, verified: false });
+      } catch {
+        yes.disabled = false;
+        note.textContent = t('confirm.failed');
+      }
+    });
     return box;
   }
 

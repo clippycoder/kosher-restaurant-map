@@ -77,6 +77,17 @@ nothing if jdn's data can't be read or looks truncated. The build reads shadows
 through `GET /api/versions` (per field, with `base`) and community listings
 through `GET /api/published`, which excludes shadows.
 
+## "Is this correct?"
+
+`POST /api/confirmations {restaurant: "c<id>"}` counts one person (fingerprint)
+once per published community listing; `GET /api/confirmations/c<id>` returns
+`{count, needed, verified, mine}`. At 5 different people the listing gets
+`verified_at` and the map stops asking. No captcha -- it is one click -- but 30
+confirmations a day per person and 3,000 overall. Someone with many internet
+connections could fake it; the stakes are a button disappearing. An accepted
+correction clears the listing's confirmations. `/api/published` carries
+`confirmations` and `verified`.
+
 ## Fields
 
 Defined once in [`public/forms/fields.js`](../public/forms/fields.js), which the

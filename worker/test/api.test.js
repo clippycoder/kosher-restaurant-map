@@ -778,3 +778,64 @@ test('the map\'s own community listings are not read as jdn listings', async () 
   // not flagged against the map file's copy; ours are checked from the database
   assert.equal(r.body.status, 'published');
 });
+
+// --- "Is this correct?" ------------------------------------------------------------
+
+const confirmIt = (ref, ip) => call('POST', '/api/confirmations', { body: { restaurant: ref }, ip });
+const confState = (ref, ip) => call('GET', `/api/confirmations/${ref}`, { ip });
+
+test('confirmations: five different people verify a community listing; one person counts once', async () => {
+  await submit(VALID); // c1
+  let r = await confirmIt('c1', '1.1.1.1');
+  assert.equal(r.status, 201);
+  assert.deepEqual(r.body, { restaurant: 'c1', count: 1, needed: 5, verified: false, mine: true });
+  r = await confirmIt('c1', '1.1.1.1');
+  assert.equal(r.body.count, 1, 'the same person twice is one');
+  assert.equal((await confState('c1', '1.1.1.1')).body.mine, true);
+  assert.equal((await confState('c1', '9.9.9.9')).body.mine, false);
+  for (const ip of ['2.2.2.2', '3.3.3.3', '4.4.4.4']) await confirmIt('c1', ip);
+  assert.equal((await confState('c1', '1.1.1.1')).body.verified, false);
+  r = await confirmIt('c1', '5.5.5.5');
+  assert.equal(r.body.count, 5);
+  assert.equal(r.body.verified, true);
+  r = await confirmIt('c1', '6.6.6.6');
+  assert.equal(r.body.count, 5, 'once verified, no more are counted');
+  const pub = (await call('GET', '/api/published')).body.submissions[0];
+  assert.equal(pub.verified, true);
+  assert.equal(pub.confirmations, 5);
+});
+
+test('confirmations: only published community listings', async () => {
+  assert.equal((await confirmIt('2699', '1.1.1.1')).status, 422, 'not jdn listings');
+  assert.equal((await confirmIt('c1', '1.1.1.1')).status, 422, 'no such listing');
+  await submit({ ...VALID, name: 'casino www.x.com' }); // held
+  assert.equal((await confirmIt('c1', '1.1.1.1')).status, 422, 'not a held one');
+  assert.equal((await confState('c1', '1.1.1.1')).status, 404);
+});
+
+test('confirmations: an accepted correction starts the count again', async () => {
+  await submit(VALID);
+  for (const ip of ['1.1.1.1', '2.2.2.2', '3.3.3.3']) await confirmIt('c1', ip);
+  for (const ip of ['7.7.7.7', '8.8.8.8']) await edit({ restaurant: 'c1', phone: '02-999-9999' }, ip);
+  const s = (await confState('c1', '1.1.1.1')).body;
+  assert.equal(s.count, 0);
+  assert.equal(s.mine, false);
+});
+
+test('confirmations: fingerprints are purged after 30 days like everywhere else', async () => {
+  await submit(VALID);
+  await confirmIt('c1', '1.1.1.1');
+  await purgeClientHashes(env, Date.now() + 31 * 24 * 3600 * 1000);
+  assert.equal(env.DB.raw.prepare('SELECT client_hash FROM confirmations').get().client_hash, null);
+  assert.equal((await confState('c1', '1.1.1.1')).body.count, 1, 'the confirmation itself stays');
+});
+
+test('confirmations: thirty a day per person', async () => {
+  for (let i = 0; i < 31; i++) {
+    env.DB.raw.prepare(
+      "INSERT INTO submissions (status, data, private, flags, created_at) VALUES ('published', '{}', '{}', '[]', ?)",
+    ).run(new Date().toISOString());
+  }
+  for (let i = 1; i <= 30; i++) assert.equal((await confirmIt(`c${i}`, '1.1.1.1')).status, 201);
+  assert.equal((await confirmIt('c31', '1.1.1.1')).status, 429);
+});

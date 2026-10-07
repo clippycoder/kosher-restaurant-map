@@ -35,6 +35,7 @@ import { spamFlags, duplicateFlags } from './screen.js';
 import { jdnRecords } from './dataset.js';
 import { intake, purgeClientHashes } from './intake.js';
 import { submitEdit, publicVersions, adminEdits, syncShadows, REMOVED_FLAG } from './edits.js';
+import { confirm, confirmationState } from './confirm.js';
 import { json, corsHeaders, readBody, requireAdmin } from './http.js';
 
 export { purgeClientHashes };
@@ -82,6 +83,9 @@ async function route(request, env) {
   if (method === 'POST' && p === '/api/submissions') return submit(request, env, cors);
   if (method === 'POST' && p === '/api/edits') return submitEdit(request, env, cors);
   if (method === 'POST' && p === '/api/reports') return report(request, env, cors);
+  if (method === 'POST' && p === '/api/confirmations') return confirm(request, env, cors);
+  const conf = p.match(/^\/api\/confirmations\/(c\d{1,9})$/);
+  if (method === 'GET' && conf) return confirmationState(request, env, cors, conf[1]);
 
   return json({ error: 'not found' }, 404, cors);
 }
@@ -124,12 +128,15 @@ async function published(env, cors) {
   // Selects `data` only. `private` never leaves the database on this path.
   // Our own listings only: shadows reach the map through /api/versions.
   const { results } = await env.DB.prepare(
-    "SELECT id, data, created_at FROM submissions WHERE status = 'published' AND shadows IS NULL ORDER BY id",
+    `SELECT s.id, s.data, s.created_at, s.verified_at,
+       (SELECT COUNT(*) FROM confirmations c WHERE c.restaurant = 'c' || s.id) AS confirmations
+     FROM submissions s WHERE s.status = 'published' AND s.shadows IS NULL ORDER BY s.id`,
   ).all();
   return json({
     generated: new Date().toISOString(),
     submissions: results.map((row) => ({
       id: `c${row.id}`, ...JSON.parse(row.data), submittedAt: row.created_at,
+      confirmations: row.confirmations, verified: !!row.verified_at,
     })),
   }, 200, { ...cors, 'cache-control': 'public, max-age=300' });
 }

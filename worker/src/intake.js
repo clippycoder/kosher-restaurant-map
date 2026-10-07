@@ -74,7 +74,7 @@ export async function intake(request, env, cors, table, fields) {
 
 export async function purgeClientHashes(env, now = Date.now()) {
   const cutoff = new Date(now - CLIENT_HASH_TTL_MS).toISOString();
-  for (const table of Object.keys(LIMITS)) {
+  for (const table of [...Object.keys(LIMITS), 'confirmations']) {
     await env.DB.prepare(
       `UPDATE ${table} SET client_hash = NULL WHERE client_hash IS NOT NULL AND created_at < ?`,
     ).bind(cutoff).run();

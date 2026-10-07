@@ -32,6 +32,7 @@ import { jdnRecords, asFields } from './dataset.js';
 import { spamFlags } from './screen.js';
 import { intake } from './intake.js';
 import { json, readBody } from './http.js';
+import { resetConfirmations } from './confirm.js';
 
 export const CORROBORATION_GAP_MS = 60 * 60 * 1000;
 export const REMOVED_FLAG = { kind: 'source', reason: 'removed from בהשגחה' };
@@ -97,6 +98,7 @@ async function acceptValue(env, L, field, value, now) {
     history[field] = { previous: L.shown[field] ?? '', acceptedAt: now };
     await env.DB.prepare('UPDATE submissions SET data = ?, corrections = ? WHERE id = ?')
       .bind(JSON.stringify(data), JSON.stringify(history), L.row.id).run();
+    await resetConfirmations(env, L.ref, L.row.id);
     return;
   }
   const corrections = { ...L.corrections, [field]: { base: L.base(field), acceptedAt: now } };

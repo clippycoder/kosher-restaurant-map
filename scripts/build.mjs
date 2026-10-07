@@ -532,6 +532,8 @@ function communityRecord(s, aliases) {
     image: '',
     link: '',
     modified: s.submittedAt,
+    // "Is this correct?": asked until enough different people have said yes.
+    verified: !!s.verified,
   };
   for (const k of EXTRA_FIELDS) if (s[k]) r[k] = s[k];
   // Picked from the form's address suggestions: the place's own coordinates.
