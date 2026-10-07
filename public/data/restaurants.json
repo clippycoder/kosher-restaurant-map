@@ -1,17 +1,17 @@
 {
-  "generated": "2026-10-07T19:47:13.710Z",
+  "generated": "2026-10-07T22:01:15.925Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
-    "total": 643,
-    "mapped": 626,
+    "total": 644,
+    "mapped": 627,
     "unmapped": 17,
-    "community": 2
+    "community": 3
   },
   "facets": {
     "cities": [
       {
         "name": "ירושלים",
-        "count": 148,
+        "count": 149,
         "area": "ירושלים"
       },
       {
@@ -537,7 +537,7 @@
       },
       {
         "name": "ירושלים",
-        "count": 192
+        "count": 193
       },
       {
         "name": "צפון",
@@ -562,12 +562,12 @@
         "count": 149
       },
       {
-        "name": "הרב מחפוד",
+        "name": "בד״ץ העדה״ח ירושלים",
         "count": 41
       },
       {
-        "name": "בד״ץ העדה״ח ירושלים",
-        "count": 40
+        "name": "הרב מחפוד",
+        "count": 41
       },
       {
         "name": "הרב לנדא",
@@ -609,7 +609,7 @@
     "types": [
       {
         "name": "חלבי",
-        "count": 339
+        "count": 340
       },
       {
         "name": "בשרי",
@@ -8536,6 +8536,26 @@
       "precision": "address",
       "lat": 31.7891109,
       "lon": 35.2153891
+    },
+    {
+      "id": "c4",
+      "source": "community",
+      "name": "פיצה כיכר השבת",
+      "address": "מאה שערים 2",
+      "cityRaw": "ירושלים",
+      "city": "ירושלים",
+      "area": "ירושלים",
+      "kashrut": "בד״ץ העדה״ח ירושלים",
+      "type": "חלבי",
+      "phone": "025780277",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-07T20:46:31.508Z",
+      "verified": false,
+      "reservation": "לא",
+      "precision": "address",
+      "lat": 31.788136,
+      "lon": 35.219422
     },
     {
       "id": 783,

@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-10-07T19:47:13.609Z",
+  "fetched": "2026-10-07T22:01:15.886Z",
   "submissions": [
     {
       "id": "c1",
@@ -28,6 +28,21 @@
       "lat": 31.800909,
       "lon": 35.227713,
       "submittedAt": "2026-10-07T18:33:26.338Z",
+      "confirmations": 0,
+      "verified": false
+    },
+    {
+      "id": "c4",
+      "name": "פיצה כיכר השבת",
+      "address": "מאה שערים 2",
+      "city": "ירושלים",
+      "type": "חלבי",
+      "hechsher": "בד״ץ העדה״ח ירושלים",
+      "phone": "025780277",
+      "reservation": "לא",
+      "lat": 31.788136,
+      "lon": 35.219422,
+      "submittedAt": "2026-10-07T20:46:31.508Z",
       "confirmations": 0,
       "verified": false
     }
