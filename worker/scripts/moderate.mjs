@@ -8,7 +8,9 @@
  * (service "kosher-map-admin-token"). SUBMISSIONS_API and ADMIN_TOKEN override
  * them, e.g. SUBMISSIONS_API=http://localhost:8787 against `wrangler dev`.
  *
- *   list [held|published|rejected|all]     default: held
+ *   list                                   your listings, newest first, with their status
+ *   list held|published|rejected           only those (held = waiting for your review)
+ *   list shadows                           corrected copies of בהשגחה listings
  *   show <id>
  *   publish <id> [note]                    held -> on the map
  *   reject <id> [note]                     off the map
@@ -111,9 +113,23 @@ const note = () => args.slice(1).join(' ') || undefined;
 
 switch (cmd) {
   case 'list': {
-    const { submissions } = await api('GET', `submissions?status=${args[0] || 'held'}&limit=200`);
-    if (!submissions.length) console.log('nothing here');
+    const which = args[0] || 'mine';
+    if (!['mine', 'shadows', 'held', 'published', 'rejected', 'all'].includes(which)) {
+      console.error('list [held|published|rejected|shadows|all]');
+      process.exit(2);
+    }
+    const status = ['held', 'published', 'rejected'].includes(which) ? which : 'all';
+    let { submissions } = await api('GET', `submissions?status=${status}&limit=200`);
+    // Shadows are corrected copies of jdn listings, not submissions; listed apart.
+    if (which === 'shadows') submissions = submissions.filter((s) => s.shadows);
+    else if (which !== 'all') submissions = submissions.filter((s) => !s.shadows);
+    if (!submissions.length) console.log(which === 'held' ? 'nothing waiting for review' : 'nothing here');
     submissions.forEach((s) => printSubmission(s));
+    if (which === 'mine') {
+      const held = submissions.filter((s) => s.status === 'held').length;
+      console.log(`\n${submissions.length} listings, ${held} waiting for review` +
+        (held ? ' (`list held`)' : '') + '. Published ones reach the map with the next rebuild.');
+    }
     break;
   }
   case 'show':
