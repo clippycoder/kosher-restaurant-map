@@ -8,6 +8,9 @@ on:
 
 permissions:
   contents: write
+  # To start the Pages deploy: a push made with this workflow's token does not
+  # trigger other workflows (GitHub's rule), but a workflow_dispatch does.
+  actions: write
 
 concurrency:
   group: refresh-data
@@ -30,6 +33,7 @@ jobs:
         run: node scripts/build.mjs
 
       - name: Commit refreshed data
+        id: commit
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -42,9 +46,20 @@ jobs:
           # A long build can finish behind main if anything else landed
           # meanwhile, so rebase onto the remote before pushing.
           for attempt in 1 2 3; do
-            git pull --rebase --autostash origin main && git push && exit 0
+            if git pull --rebase --autostash origin main && git push; then
+              echo "pushed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
             echo "push attempt $attempt failed; retrying"
             sleep 5
           done
           echo "could not push refreshed data" >&2
           exit 1
+
+      # Without this the refreshed data was committed but never published:
+      # it went live only when some later code push happened to deploy it.
+      - name: Publish the refreshed data
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
