@@ -5,8 +5,8 @@
  * Keep it dependency-free and browser-safe.
  *
  * Modelled on rest.jdn.co.il/add-res-2 (their form_fields[...] names noted per
- * field). Fields used by the map and its filters are required and sit in the
- * `main` section; everything else is optional, under `advanced`.
+ * field). Fields the map shows sit in the `main` section, and are required
+ * except the phone; everything else is optional, under `advanced`.
  *
  * `private: true` fields are stored apart from the rest and are only ever
  * returned to the moderator. Changing a field here needs no migration --
@@ -52,7 +52,7 @@ export const FIELDS = [
   { key: 'city', label: 'עיר', type: 'text', required: true, max: 60, section: 'main' },
   { key: 'type', label: 'בשרי / חלבי / פרווה', type: 'choice', options: TYPES, required: true, section: 'main' },
   { key: 'hechsher', label: 'כשרות', type: 'choice', options: HECHSHERIM, required: true, section: 'main' },
-  { key: 'phone', label: 'טלפון', type: 'phone', required: true, section: 'main' },              // tel
+  { key: 'phone', label: 'טלפון', type: 'phone', section: 'main' },              // tel
 
   // advanced -- optional
   { key: 'description', label: 'תיאור קצר', type: 'text', max: 300, section: 'advanced' },       // shortdes

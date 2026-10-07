@@ -120,7 +120,8 @@ test('private fields are stored but never published', async () => {
 test('missing required fields are rejected with per-field errors, without spending the captcha', async () => {
   const r = await submit({ name: 'x', 'cf-turnstile-response': 'ok' });
   assert.equal(r.status, 422);
-  for (const k of ['address', 'city', 'type', 'hechsher', 'phone']) assert.ok(r.body.fields[k], k);
+  for (const k of ['address', 'city', 'type', 'hechsher']) assert.ok(r.body.fields[k], k);
+  assert.ok(!r.body.fields.phone, 'phone is optional');
   assert.equal(turnstileCalls, 0);
 });
 
@@ -149,6 +150,15 @@ test('unknown keys are dropped, not stored', async () => {
   const adm = await call('GET', '/api/admin/submissions/1', { admin: true, origin: null });
   assert.ok(!('isAdmin' in adm.body.data));
   assert.ok(!('coupon' in adm.body.data));
+});
+
+test('phone is optional: a submission without one publishes', async () => {
+  const { phone, ...noPhone } = VALID;
+  const r = await submit(noPhone);
+  assert.equal(r.status, 201);
+  assert.equal(r.body.status, 'published');
+  const pub = await call('GET', '/api/published');
+  assert.ok(!('phone' in pub.body.submissions[0]));
 });
 
 test('form-encoded posts work as well as JSON', async () => {

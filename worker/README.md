@@ -76,7 +76,8 @@ Adding or removing a field needs no migration; submissions are stored as JSON.
 
 | Section | Field | |
 | --- | --- | --- |
-| main (required) | name, address, city, type, hechsher (jdn's 13), phone | |
+| main (required) | name, address, city, type, hechsher (jdn's 13) | |
+| main (optional) | phone | public |
 | advanced (optional) | short description, WhatsApp, website/Instagram, hours, delivery, accessible, reservation required | public |
 | advanced (optional) | relation to the place, owner phone, mashgiach phone | **private** |
 
