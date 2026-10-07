@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-07T22:43:42.341Z",
+  "generated": "2026-10-07T22:46:25.954Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
     "total": 644,
@@ -2305,7 +2305,6 @@
       "modified": "2023-01-12T10:42:19",
       "city": "אילת",
       "edited": [
-        "address",
         "city"
       ],
       "precision": "address",
@@ -2726,7 +2725,7 @@
     {
       "id": 2201,
       "name": "בורגרס בר – מודיעין עזריאלי",
-      "address": "קניון עזריאלי, מתחם המזון המהיר קומה 2, מודיעין",
+      "address": "קניון עזריאלי, לב העיר 16",
       "cityRaw": "",
       "area": "מרכז",
       "kashrut": "בית יוסף",
@@ -2737,11 +2736,12 @@
       "modified": "2023-01-12T10:42:52",
       "city": "מודיעין",
       "edited": [
-        "city"
+        "city",
+        "address"
       ],
-      "precision": "city",
-      "lat": 31.9085744,
-      "lon": 35.0069297
+      "precision": "address",
+      "lat": 31.8997936,
+      "lon": 35.0080873
     },
     {
       "id": 2245,
@@ -6740,7 +6740,6 @@
       "modified": "2023-08-07T16:35:25",
       "city": "ראש פינה",
       "edited": [
-        "address",
         "city"
       ],
       "precision": "address",
@@ -10244,7 +10243,6 @@
       "modified": "2023-08-07T16:42:26",
       "city": "בית שמש",
       "edited": [
-        "address",
         "city"
       ],
       "precision": "address",
