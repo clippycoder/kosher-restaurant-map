@@ -1,22 +1,22 @@
 {
-  "generated": "2026-10-07T22:01:15.925Z",
+  "generated": "2026-10-07T22:43:42.341Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
     "total": 644,
-    "mapped": 627,
-    "unmapped": 17,
+    "mapped": 644,
+    "unmapped": 0,
     "community": 3
   },
   "facets": {
     "cities": [
       {
         "name": "ירושלים",
-        "count": 149,
+        "count": 151,
         "area": "ירושלים"
       },
       {
         "name": "בני ברק",
-        "count": 40,
+        "count": 41,
         "area": "מרכז"
       },
       {
@@ -26,7 +26,7 @@
       },
       {
         "name": "בית שמש",
-        "count": 28,
+        "count": 32,
         "area": "מרכז"
       },
       {
@@ -45,19 +45,24 @@
         "area": "מרכז"
       },
       {
+        "name": "מודיעין",
+        "count": 13,
+        "area": "מרכז"
+      },
+      {
         "name": "נתניה",
         "count": 13,
         "area": "צפון"
       },
       {
-        "name": "מודיעין",
+        "name": "טבריה",
         "count": 12,
-        "area": "מרכז"
+        "area": "צפון"
       },
       {
-        "name": "טבריה",
+        "name": "חולון",
         "count": 11,
-        "area": "צפון"
+        "area": "מרכז"
       },
       {
         "name": "באר שבע",
@@ -70,9 +75,9 @@
         "area": "מרכז"
       },
       {
-        "name": "חולון",
-        "count": 10,
-        "area": "מרכז"
+        "name": "אילת",
+        "count": 9,
+        "area": "דרום"
       },
       {
         "name": "נתיבות",
@@ -80,9 +85,14 @@
         "area": "דרום"
       },
       {
-        "name": "אילת",
+        "name": "אשקלון",
         "count": 8,
         "area": "דרום"
+      },
+      {
+        "name": "חדרה",
+        "count": 8,
+        "area": "צפון"
       },
       {
         "name": "מעלה אדומים",
@@ -95,19 +105,9 @@
         "area": "מרכז"
       },
       {
-        "name": "אשקלון",
-        "count": 7,
-        "area": "דרום"
-      },
-      {
         "name": "ביתר עילית",
         "count": 7,
         "area": "ירושלים"
-      },
-      {
-        "name": "חדרה",
-        "count": 7,
-        "area": "צפון"
       },
       {
         "name": "חיפה",
@@ -120,6 +120,11 @@
         "area": "צפון"
       },
       {
+        "name": "קריית שמונה",
+        "count": 6,
+        "area": "צפון"
+      },
+      {
         "name": "רחובות",
         "count": 6,
         "area": "שפלה"
@@ -127,6 +132,11 @@
       {
         "name": "שדרות",
         "count": 6,
+        "area": "דרום"
+      },
+      {
+        "name": "אופקים",
+        "count": 5,
         "area": "דרום"
       },
       {
@@ -145,12 +155,17 @@
         "area": "מרכז"
       },
       {
+        "name": "צפת",
+        "count": 5,
+        "area": "צפון"
+      },
+      {
         "name": "קריית אתא",
         "count": 5,
         "area": "צפון"
       },
       {
-        "name": "קריית שמונה",
+        "name": "ראש פינה",
         "count": 5,
         "area": "צפון"
       },
@@ -158,11 +173,6 @@
         "name": "רעננה",
         "count": 5,
         "area": "מרכז"
-      },
-      {
-        "name": "אופקים",
-        "count": 4,
-        "area": "דרום"
       },
       {
         "name": "אור יהודה",
@@ -193,16 +203,6 @@
         "name": "צור הדסה",
         "count": 4,
         "area": "ירושלים"
-      },
-      {
-        "name": "צפת",
-        "count": 4,
-        "area": "צפון"
-      },
-      {
-        "name": "ראש פינה",
-        "count": 4,
-        "area": "צפון"
       },
       {
         "name": "רמלה",
@@ -2294,7 +2294,7 @@
     {
       "id": 2199,
       "name": "בורגרס בר – אילת ביג",
-      "address": "Burgers Bar | בורגרס בר, הסתת, אילת, ישראל",
+      "address": "הסתת",
       "cityRaw": "",
       "area": "דרום",
       "kashrut": "בית יוסף",
@@ -2303,10 +2303,14 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2023/01/בורגרסבר.jpg",
       "link": "https://rest.jdn.co.il/rest/2199/",
       "modified": "2023-01-12T10:42:19",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "אילת",
+      "edited": [
+        "address",
+        "city"
+      ],
+      "precision": "address",
+      "lat": 29.5681332,
+      "lon": 34.9583704
     },
     {
       "id": 2197,
@@ -2677,10 +2681,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2023/01/בורגרסבר.jpg",
       "link": "https://rest.jdn.co.il/rest/2205/",
       "modified": "2023-01-12T10:44:34",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "ירושלים",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 31.7860887,
+      "lon": 35.1889843
     },
     {
       "id": 2241,
@@ -2728,10 +2735,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2023/01/בורגרסבר.jpg",
       "link": "https://rest.jdn.co.il/rest/2201/",
       "modified": "2023-01-12T10:42:52",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "מודיעין",
+      "edited": [
+        "city"
+      ],
+      "precision": "city",
+      "lat": 31.9085744,
+      "lon": 35.0069297
     },
     {
       "id": 2245,
@@ -3459,10 +3469,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/09/logo-01.jpg",
       "link": "https://rest.jdn.co.il/rest/11/",
       "modified": "2022-11-08T23:21:10",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "בני ברק",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 32.0931874,
+      "lon": 34.8308908
     },
     {
       "id": 2174,
@@ -4309,10 +4322,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2023/10/IMG_20231001_003734.jpg",
       "link": "https://rest.jdn.co.il/rest/2643/",
       "modified": "2024-02-17T23:01:26",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "אשקלון",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 31.6579792,
+      "lon": 34.5876321
     },
     {
       "id": 1322,
@@ -6132,10 +6148,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/09/677-1.jpg",
       "link": "https://rest.jdn.co.il/rest/450/",
       "modified": "2022-10-23T15:34:52",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "צפת",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 32.9679483,
+      "lon": 35.4939232
     },
     {
       "id": 1357,
@@ -6200,10 +6219,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/09/בורגרים.png",
       "link": "https://rest.jdn.co.il/rest/215/",
       "modified": "2022-11-29T13:46:35",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "טבריה",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 32.7861503,
+      "lon": 35.53622
     },
     {
       "id": 1333,
@@ -6336,10 +6358,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/09/מסובין-2.png",
       "link": "https://rest.jdn.co.il/rest/210/",
       "modified": "2022-12-04T16:05:10",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "בית שמש",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 31.756341,
+      "lon": 34.9899212
     },
     {
       "id": 232,
@@ -6353,10 +6378,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/09/נויה.png",
       "link": "https://rest.jdn.co.il/rest/232/",
       "modified": "2022-11-29T13:15:24",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "ירושלים",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 31.7799282,
+      "lon": 35.2219387
     },
     {
       "id": 201,
@@ -6701,7 +6729,7 @@
     {
       "id": 2584,
       "name": "ניו דלי",
-      "address": "סנטר הגליל ראש פינה, HaAgas Street, ראש פינה, Israel",
+      "address": "סנטר הגליל, האגס",
       "cityRaw": "",
       "area": "צפון",
       "kashrut": "הרב מחפוד",
@@ -6710,10 +6738,14 @@
       "image": "",
       "link": "https://rest.jdn.co.il/rest/2584/",
       "modified": "2023-08-07T16:35:25",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "ראש פינה",
+      "edited": [
+        "address",
+        "city"
+      ],
+      "precision": "address",
+      "lat": 32.9689211,
+      "lon": 35.5507486
     },
     {
       "id": 1245,
@@ -8790,10 +8822,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2026/07/28037b40-88a8-41b8-989a-3dc6ebb1b060-1_all_7124-scaled.jpg",
       "link": "https://rest.jdn.co.il/rest/2780/",
       "modified": "2026-07-08T07:39:07",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "חולון",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 32.027825,
+      "lon": 34.7621813
     },
     {
       "id": 2588,
@@ -8858,10 +8893,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2024/08/1000379385.jpg",
       "link": "https://rest.jdn.co.il/rest/2673/",
       "modified": "2024-09-22T10:44:06",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "אופקים",
+      "edited": [
+        "city"
+      ],
+      "precision": "street",
+      "lat": 31.307741,
+      "lon": 34.620138
     },
     {
       "id": 1762,
@@ -9997,10 +10035,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2023/08/416E1947-27F3-4DEE-B1C2-182FCB6F2D51.jpeg",
       "link": "https://rest.jdn.co.il/rest/2607/",
       "modified": "2023-08-21T13:02:41",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "בית שמש",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 31.7034072,
+      "lon": 34.9653948
     },
     {
       "id": 1575,
@@ -10192,7 +10233,7 @@
     {
       "id": 2592,
       "name": "פלאפל מנש",
-      "address": "ירמיהו הנביא, 34, בית שמש",
+      "address": "ירמיהו הנביא 34",
       "cityRaw": "",
       "area": "מרכז",
       "kashrut": "בד״ץ העדה״ח ירושלים",
@@ -10201,10 +10242,14 @@
       "image": "",
       "link": "https://rest.jdn.co.il/rest/2592/",
       "modified": "2023-08-07T16:42:26",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "בית שמש",
+      "edited": [
+        "address",
+        "city"
+      ],
+      "precision": "address",
+      "lat": 31.7031547,
+      "lon": 34.9843339
     },
     {
       "id": 769,
@@ -10235,10 +10280,13 @@
       "image": "",
       "link": "https://rest.jdn.co.il/rest/2590/",
       "modified": "2023-08-07T16:36:01",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "חדרה",
+      "edited": [
+        "city"
+      ],
+      "precision": "street",
+      "lat": 32.4104881,
+      "lon": 34.87107065
     },
     {
       "id": 298,
@@ -10626,10 +10674,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/09/קפה-גרג.png",
       "link": "https://rest.jdn.co.il/rest/207/",
       "modified": "2022-12-05T15:59:45",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "קריית שמונה",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 33.2105958,
+      "lon": 35.5683694
     },
     {
       "id": 262,
@@ -11221,10 +11272,13 @@
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/12/קצפת-1.jpg",
       "link": "https://rest.jdn.co.il/rest/1505/",
       "modified": "2022-12-13T15:11:24",
-      "city": "",
-      "precision": null,
-      "lat": null,
-      "lon": null
+      "city": "בית שמש",
+      "edited": [
+        "city"
+      ],
+      "precision": "address",
+      "lat": 31.756197,
+      "lon": 34.985749
     },
     {
       "id": 1543,
