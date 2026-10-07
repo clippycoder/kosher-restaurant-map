@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-10-07T22:46:20.453Z",
+  "fetched": "2026-10-07T23:39:51.245Z",
   "submissions": [
     {
       "id": "c1",
@@ -43,6 +43,17 @@
       "lat": 31.788136,
       "lon": 35.219422,
       "submittedAt": "2026-10-07T20:46:31.508Z",
+      "confirmations": 0,
+      "verified": false
+    },
+    {
+      "id": "c22",
+      "name": "סופט קוקיז",
+      "address": "תפארת ישראל 17",
+      "city": "ירושלים",
+      "type": "חלבי",
+      "hechsher": "קהילות",
+      "submittedAt": "2026-10-07T23:38:30.408Z",
       "confirmations": 0,
       "verified": false
     }
