@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-07T19:38:01.184Z",
+  "generated": "2026-10-07T19:47:13.710Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
     "total": 643,
@@ -575,7 +575,7 @@
       },
       {
         "name": "הרב רובין",
-        "count": 28
+        "count": 29
       },
       {
         "name": "חוג חת״ס ב״ב",
@@ -583,7 +583,7 @@
       },
       {
         "name": "רבנות ירושלים מהדרין",
-        "count": 21
+        "count": 20
       },
       {
         "name": "חתם סופר פ״ת",
@@ -7758,13 +7758,16 @@
       "address": "מרדכי בן הלל 15, ירושלים",
       "cityRaw": "ירושלים",
       "area": "דרום",
-      "kashrut": "רבנות ירושלים מהדרין",
+      "kashrut": "הרב רובין",
       "type": "חלבי",
       "phone": "1700506070",
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/12/פיצה-האט-6.jpg",
       "link": "https://rest.jdn.co.il/rest/1635/",
       "modified": "2022-12-15T12:33:10",
       "city": "ירושלים",
+      "edited": [
+        "hechsher"
+      ],
       "precision": "address",
       "lat": 31.7812077,
       "lon": 35.2178239

@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-10-07T19:38:01.140Z",
+  "fetched": "2026-10-07T19:47:13.609Z",
   "submissions": [
     {
       "id": "c1",
@@ -32,5 +32,13 @@
       "verified": false
     }
   ],
-  "versions": {}
+  "versions": {
+    "1635": {
+      "hechsher": {
+        "value": "הרב רובין",
+        "base": "רבנות ירושלים מהדרין",
+        "acceptedAt": "2026-10-07T19:45:11.248Z"
+      }
+    }
+  }
 }
