@@ -316,6 +316,15 @@ button:focus-visible {
   font-weight: 600;
 }
 .pop .desc { margin: 0 0 8px; font-size: 13px; color: var(--text); }
+.pop .update-link {
+  display: block;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.pop .update-link:hover { color: var(--accent); }
 .pop .links a { color: var(--accent); }
 
 .leaflet-popup-content { margin: 11px 13px; }
@@ -499,3 +508,8 @@ html[lang="en"] :is(.brand, .add-prompt, #filters-toggle, #add-restaurant,
                     .leaflet-popup-content, .pins-toggle) {
   direction: ltr;
 }
+
+/* Restaurant data reads in its own direction (dir="auto": Hebrew right to left
+   on the English page too) but lines up with the page it sits on. */
+html[lang="en"] [dir="auto"] { text-align: left; }
+html[lang="he"] [dir="auto"] { text-align: right; }

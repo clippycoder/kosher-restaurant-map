@@ -101,7 +101,8 @@
     const row = (label, value) => {
       if (!value) return;
       dl.appendChild(el('dt', { text: label }));
-      dl.appendChild(el('dd', { text: value }));
+      // dir=auto: Hebrew data reads right to left even on the English page.
+      dl.appendChild(el('dd', { text: value, dir: 'auto' }));
     };
     row(t('pop.address'), [r.address, r.city].filter(Boolean).join(', '));
     row(t('pop.kashrut'), r.kashrut);
@@ -109,11 +110,11 @@
     row(t('pop.phone'), r.phone);
     row(t('pop.hours'), r.hours);
 
-    const box = el('div', { class: 'pop' }, [el('h3', { text: r.name })]);
+    const box = el('div', { class: 'pop' }, [el('h3', { text: r.name, dir: 'auto' })]);
     if (r.source === 'community') {
       box.appendChild(el('p', { class: 'badge', text: t('pop.community') }));
     }
-    if (r.description) box.appendChild(el('p', { class: 'desc', text: r.description }));
+    if (r.description) box.appendChild(el('p', { class: 'desc', text: r.description, dir: 'auto' }));
 
     const imgSrc = safeUrl(r.image);
     if (imgSrc) {
@@ -155,6 +156,11 @@
       }));
     }
     box.appendChild(links);
+
+    // Closed, wrong details, misplaced pin: our own update/report page.
+    const langParam = new URLSearchParams(location.search).get('lang');
+    const updateUrl = `update.html?id=${encodeURIComponent(r.id)}${langParam ? `&lang=${encodeURIComponent(langParam)}` : ''}`;
+    box.appendChild(el('a', { class: 'update-link', href: updateUrl, text: t('pop.update') }));
     return box;
   }
 
@@ -188,7 +194,7 @@
     });
     return el('label', { class: `opt${disabled ? ' disabled' : ''}` }, [
       input,
-      el('span', { class: 'name', text: name }),
+      el('span', { class: 'name', text: name, dir: 'auto' }),
       el('span', { class: 'count', text: String(count) }),
     ]);
   }
@@ -231,7 +237,7 @@
     }
 
     for (const [area, list] of byArea) {
-      box.appendChild(el('div', { class: 'city-group', text: area || t('city.otherArea') }));
+      box.appendChild(el('div', { class: 'city-group', text: area || t('city.otherArea'), dir: 'auto' }));
       for (const c of list) {
         const n = counts.get(c.name) || 0;
         box.appendChild(option('cities', c.name, n, sel.has(c.name), n === 0 && !sel.has(c.name)));
@@ -250,8 +256,8 @@
     $('unmapped-label').textContent = t('unmapped', { n: unmapped.length });
     list.replaceChildren(...unmapped.map((r) =>
       el('li', {}, [
-        el('span', { class: 'n', text: r.name }),
-        el('span', { class: 'a', text: [r.address, r.city].filter(Boolean).join(', ') }),
+        el('span', { class: 'n', text: r.name, dir: 'auto' }),
+        el('span', { class: 'a', text: [r.address, r.city].filter(Boolean).join(', '), dir: 'auto' }),
       ])));
   }
 
@@ -327,6 +333,8 @@
   // -------------------------------------------------------------------------
 
   function wireUp() {
+    window.i18n.followTypedDirection($('search'));
+    window.i18n.followTypedDirection($('city-search'));
     let t;
     $('search').addEventListener('input', (e) => {
       clearTimeout(t);

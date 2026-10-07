@@ -56,6 +56,26 @@
       'title.map': 'מפת מסעדות כשרות בישראל',
       'desc.map': 'מפה של מסעדות בהשגחה בישראל, עם סינון לפי עיר, אזור, סוג וכשרות.',
       'title.add': 'הוספת מסעדה · מפת מסעדות כשרות',
+      'title.update': 'עדכון מסעדה · מפת מסעדות כשרות',
+      'desc.update': 'עדכון פרטים או דיווח על מסעדה במפת המסעדות הכשרות.',
+      'update.heading': 'עדכון מסעדה',
+      'update.current': 'הפרטים במפה כרגע',
+      'update.what': 'מה תרצו לעדכן?',
+      'update.kind.closed': 'המקום נסגר',
+      'update.kind.details': 'פרטים שגויים או חסרים',
+      'update.kind.location': 'המיקום במפה שגוי',
+      'update.kind.other': 'משהו אחר',
+      'update.correctTitle': 'תיקון הפרטים',
+      'update.correctHint': 'שנו רק את מה שלא נכון. תיקון מתקבל כששני אנשים שונים מדווחים אותו דבר, או אחרי בדיקה.',
+      'update.details.optional': 'פרטים נוספים (לא חובה)',
+      'update.details.location': 'איפה המקום נמצא בפועל? (לא חובה)',
+      'update.details.required': 'מה צריך לתקן?',
+      'update.notFound': 'המסעדה לא נמצאה במפה.',
+      'done.update': 'תודה על העדכון!',
+      'st.noChanges': 'לא שונה אף פרט.',
+      'st.chooseKind': 'נא לבחור מה לעדכן.',
+      'field.details': 'פרטים',
+      'pop.update': 'עדכון / דיווח',
       'desc.add': 'הוספת מסעדה בהשגחה למפת המסעדות הכשרות בישראל.',
       brand: 'מסעדות בהשגחה',
       loading: 'טוען…',
@@ -167,6 +187,26 @@
       'title.map': 'Kosher Restaurant Map · Israel',
       'desc.map': 'A map of kosher-supervised restaurants in Israel, filterable by city, region, type and hechsher.',
       'title.add': 'Add a restaurant · Kosher Restaurant Map',
+      'title.update': 'Update a restaurant · Kosher Restaurant Map',
+      'desc.update': 'Correct the details of a restaurant on the kosher restaurant map, or report a problem.',
+      'update.heading': 'Update a restaurant',
+      'update.current': 'On the map now',
+      'update.what': 'What would you like to tell us?',
+      'update.kind.closed': 'It has closed',
+      'update.kind.details': 'Some details are wrong or missing',
+      'update.kind.location': 'The pin is in the wrong place',
+      'update.kind.other': 'Something else',
+      'update.correctTitle': 'Correct the details',
+      'update.correctHint': 'Change only what is wrong. A correction is accepted once two different people report the same thing, or after review.',
+      'update.details.optional': 'Anything to add? (optional)',
+      'update.details.location': 'Where is it actually? (optional)',
+      'update.details.required': 'What needs fixing?',
+      'update.notFound': 'This restaurant was not found on the map.',
+      'done.update': 'Thanks for your update!',
+      'st.noChanges': 'Nothing was changed.',
+      'st.chooseKind': 'Please choose what to tell us.',
+      'field.details': 'Details',
+      'pop.update': 'Update / report',
       'desc.add': 'Add a kosher-supervised restaurant to the map of kosher restaurants in Israel.',
       brand: 'Kosher Restaurants',
       loading: 'Loading…',
@@ -290,6 +330,24 @@
     return s.replace(/\{(\w+)\}/g, (_, k) => (k in params ? String(params[k]) : `{${k}}`));
   }
 
+  /**
+   * Makes a text box read in the direction of what is typed into it: Hebrew
+   * right to left on the English page, English left to right on the Hebrew one.
+   * dir="auto" alone can't do this -- an empty box with it turns left-to-right
+   * even on the Hebrew page; here an empty box keeps the page's direction.
+   */
+  function followTypedDirection(input) {
+    const set = () => {
+      const first = (input.value.match(/\p{L}/u) || [])[0];
+      if (!first) input.removeAttribute('dir');
+      else input.dir = /[\p{Script=Hebrew}\p{Script=Arabic}]/u.test(first) ? 'rtl' : 'ltr';
+    };
+    input.addEventListener('input', set);
+    input.addEventListener('change', set);
+    set();
+    return set; // call after setting the value from code
+  }
+
   /** A form answer button's label (yes/no, relation to the place). */
   const choice = (v) => (lang === 'en' ? CHOICES_EN[v] || v : v);
 
@@ -350,5 +408,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
   else ready();
 
-  window.i18n = { lang, t, choice, apply, switchTo };
+  window.i18n = { lang, t, choice, apply, switchTo, followTypedDirection };
 })();

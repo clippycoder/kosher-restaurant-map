@@ -100,6 +100,15 @@ see `worker/README.md` for screening, edits of jdn listings, and moderation.
 - The advanced section links to [בהשגחה's own form](https://rest.jdn.co.il/add-res-2/),
   noting that their submissions wait for their approval.
 
+**Updating and reporting.** Every popup links to `update.html?id=<id>`:
+"it has closed", "the pin is in the wrong place" and "something else" are
+reports for the moderator (`moderate.mjs reports`); "details are wrong" opens,
+for a jdn listing, a correction form filled with the current details, and only
+the fields that changed are sent as an edit -- accepted once two different
+people send the same value, or by the moderator (`moderate.mjs edits`).
+Community entries take a written report instead; the server edits jdn listings
+only. The forms share `public/forms/kit.js`.
+
 **Reaching the map.** The daily build reads the worker's two public lists --
 published submissions (`/api/published`) and accepted edits of jdn listings
 (`/api/versions`) -- and keeps a copy in `data/community.json`, used if the
@@ -143,7 +152,7 @@ on the map and in what the form stores. Validation errors travel as codes
 | `scripts/serve.mjs` | Static server for local preview. |
 | `worker/` | Community submissions API (Cloudflare Worker + D1). See `worker/README.md`. |
 | `public/i18n.js` | Hebrew/English interface text, language choice, the toggle. |
-| `public/add.html`, `public/forms/` | The add form: field definitions shared with the worker, Photon address suggestions, duplicate matching. |
+| `public/add.html`, `public/update.html`, `public/forms/` | The add and update/report forms: field definitions shared with the worker, shared form machinery (`kit.js`), Photon address suggestions, duplicate matching. |
 | `.cache/gazetteer/` | Downloaded OSM address data. Gitignored, safe to delete. |
 | `public/` | The deployed site. This directory is the Pages root. |
 | `public/data/restaurants.json` | **Generated.** The only file the browser fetches. |

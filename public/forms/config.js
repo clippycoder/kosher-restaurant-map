@@ -12,3 +12,4 @@ export const TURNSTILE_SITE_KEY = local ? '1x00000000000000000000AA' : '0x4AAAAA
 
 // Must match the worker's ACTIONS; siteverify rejects a token from another form.
 export const TURNSTILE_ACTION = 'add';
+export const TURNSTILE_ACTIONS = { add: 'add', edit: 'edit', report: 'report' };

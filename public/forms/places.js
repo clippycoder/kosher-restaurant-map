@@ -242,11 +242,13 @@ export function attachPlaces(input, {
       li.setAttribute('aria-selected', 'false');
       const main = document.createElement('span');
       main.className = 'places-main';
+      main.dir = 'auto';
       main.textContent = place.label;
       li.append(main);
       if (place.sub) {
         const sub = document.createElement('span');
         sub.className = 'places-sub';
+        sub.dir = 'auto';
         sub.textContent = place.sub;
         li.append(sub);
       }

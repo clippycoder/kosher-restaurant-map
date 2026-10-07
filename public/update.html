@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n="title.update">עדכון מסעדה · מפת מסעדות כשרות</title>
+<meta name="description" data-i18n-attr="content:desc.update" content="עדכון פרטים או דיווח על מסעדה במפת המסעדות הכשרות.">
+
+<!-- First, so the language and direction are set before anything paints. -->
+<script src="i18n.js"></script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="forms/form.css">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
+<script type="module" src="forms/update.js"></script>
+</head>
+<body class="form-page">
+
+<header id="topbar">
+  <div class="brand">
+    <h1 data-i18n="update.heading">עדכון מסעדה</h1>
+  </div>
+  <button type="button" class="lang-toggle" data-lang-toggle>English</button>
+  <a class="back" href="index.html">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span data-i18n="back">חזרה למפה</span>
+  </a>
+</header>
+
+<main class="form-wrap">
+  <section id="current" class="section current" hidden>
+    <p class="eyebrow" data-i18n="update.current"></p>
+    <h2 id="current-name"></h2>
+    <dl id="current-details"></dl>
+  </section>
+
+  <form id="update-form" novalidate hidden>
+    <fieldset id="section-kind" class="section kinds">
+      <legend data-i18n="update.what"></legend>
+      <div class="pills" id="kinds" role="radiogroup"></div>
+    </fieldset>
+
+    <section id="section-edit" class="section" hidden>
+      <h2 data-i18n="update.correctTitle"></h2>
+      <p class="note" data-i18n="update.correctHint"></p>
+      <div id="edit-main"></div>
+      <details id="section-advanced" class="section nested">
+        <summary data-i18n="section.advanced"></summary>
+        <div class="section-body"></div>
+      </details>
+    </section>
+
+    <section id="section-details" class="section" hidden></section>
+
+    <!-- Bot trap: hidden from people and screen readers alike. -->
+    <div class="hp" aria-hidden="true">
+      <label>Company <input id="hp-input" type="text" tabindex="-1" autocomplete="off"></label>
+    </div>
+
+    <div id="captcha"></div>
+    <p id="form-status" class="status" role="status" hidden></p>
+    <button id="submit" type="submit" data-i18n="submit">שליחה</button>
+    <p class="privacy" data-i18n="privacy"></p>
+  </form>
+
+  <section id="missing" class="done" hidden>
+    <h2 data-i18n="update.notFound"></h2>
+    <div class="done-actions"><a class="button" href="index.html" data-i18n="back">חזרה למפה</a></div>
+  </section>
+
+  <section id="done" class="done" hidden>
+    <h2 tabindex="-1" data-i18n="done.update"></h2>
+    <div class="done-actions"><a class="button" href="index.html" data-i18n="back">חזרה למפה</a></div>
+  </section>
+</main>
+
+</body>
+</html>

@@ -201,8 +201,11 @@ export function validate(input, fields = FIELDS) {
 
   for (const f of fields) {
     const v = values[f.key];
+    // The field it depends on may not be among those being checked (a page
+    // checking one field at a time), so fall back to the raw input.
+    const other = (k) => (k in values ? values[k] : clean(input?.[k]).trim());
     const required = f.required || (f.requiredWhen && Object.entries(f.requiredWhen)
-      .every(([k, want]) => [].concat(want).includes(values[k])));
+      .every(([k, want]) => [].concat(want).includes(other(k))));
 
     if (!v) {
       if (required) out.errors[f.key] = 'required';
