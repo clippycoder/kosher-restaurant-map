@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-07T22:46:25.954Z",
+  "generated": "2026-10-07T22:49:15.376Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
     "total": 644,
@@ -2304,7 +2304,12 @@
       "link": "https://rest.jdn.co.il/rest/2199/",
       "modified": "2023-01-12T10:42:19",
       "city": "אילת",
+      "upstream": {
+        "address": "Burgers Bar | בורגרס בר, הסתת, אילת, ישראל",
+        "city": ""
+      },
       "edited": [
+        "address",
         "city"
       ],
       "precision": "address",
@@ -2681,6 +2686,9 @@
       "link": "https://rest.jdn.co.il/rest/2205/",
       "modified": "2023-01-12T10:44:34",
       "city": "ירושלים",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -2735,6 +2743,10 @@
       "link": "https://rest.jdn.co.il/rest/2201/",
       "modified": "2023-01-12T10:42:52",
       "city": "מודיעין",
+      "upstream": {
+        "city": "",
+        "address": "קניון עזריאלי, מתחם המזון המהיר קומה 2, מודיעין"
+      },
       "edited": [
         "city",
         "address"
@@ -3470,6 +3482,9 @@
       "link": "https://rest.jdn.co.il/rest/11/",
       "modified": "2022-11-08T23:21:10",
       "city": "בני ברק",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -4323,6 +4338,9 @@
       "link": "https://rest.jdn.co.il/rest/2643/",
       "modified": "2024-02-17T23:01:26",
       "city": "אשקלון",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -6149,6 +6167,9 @@
       "link": "https://rest.jdn.co.il/rest/450/",
       "modified": "2022-10-23T15:34:52",
       "city": "צפת",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -6220,6 +6241,9 @@
       "link": "https://rest.jdn.co.il/rest/215/",
       "modified": "2022-11-29T13:46:35",
       "city": "טבריה",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -6359,6 +6383,9 @@
       "link": "https://rest.jdn.co.il/rest/210/",
       "modified": "2022-12-04T16:05:10",
       "city": "בית שמש",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -6379,6 +6406,9 @@
       "link": "https://rest.jdn.co.il/rest/232/",
       "modified": "2022-11-29T13:15:24",
       "city": "ירושלים",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -6739,7 +6769,12 @@
       "link": "https://rest.jdn.co.il/rest/2584/",
       "modified": "2023-08-07T16:35:25",
       "city": "ראש פינה",
+      "upstream": {
+        "address": "סנטר הגליל ראש פינה, HaAgas Street, ראש פינה, Israel",
+        "city": ""
+      },
       "edited": [
+        "address",
         "city"
       ],
       "precision": "address",
@@ -7796,6 +7831,9 @@
       "link": "https://rest.jdn.co.il/rest/1635/",
       "modified": "2022-12-15T12:33:10",
       "city": "ירושלים",
+      "upstream": {
+        "kashrut": "רבנות ירושלים מהדרין"
+      },
       "edited": [
         "hechsher"
       ],
@@ -8822,6 +8860,9 @@
       "link": "https://rest.jdn.co.il/rest/2780/",
       "modified": "2026-07-08T07:39:07",
       "city": "חולון",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -8893,6 +8934,9 @@
       "link": "https://rest.jdn.co.il/rest/2673/",
       "modified": "2024-09-22T10:44:06",
       "city": "אופקים",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -10035,6 +10079,9 @@
       "link": "https://rest.jdn.co.il/rest/2607/",
       "modified": "2023-08-21T13:02:41",
       "city": "בית שמש",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -10242,7 +10289,12 @@
       "link": "https://rest.jdn.co.il/rest/2592/",
       "modified": "2023-08-07T16:42:26",
       "city": "בית שמש",
+      "upstream": {
+        "address": "ירמיהו הנביא, 34, בית שמש",
+        "city": ""
+      },
       "edited": [
+        "address",
         "city"
       ],
       "precision": "address",
@@ -10279,6 +10331,9 @@
       "link": "https://rest.jdn.co.il/rest/2590/",
       "modified": "2023-08-07T16:36:01",
       "city": "חדרה",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -10673,6 +10728,9 @@
       "link": "https://rest.jdn.co.il/rest/207/",
       "modified": "2022-12-05T15:59:45",
       "city": "קריית שמונה",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
@@ -11271,6 +11329,9 @@
       "link": "https://rest.jdn.co.il/rest/1505/",
       "modified": "2022-12-13T15:11:24",
       "city": "בית שמש",
+      "upstream": {
+        "city": ""
+      },
       "edited": [
         "city"
       ],
