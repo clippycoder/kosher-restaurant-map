@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-10-07T18:38:40.914Z",
+  "fetched": "2026-10-07T19:38:01.140Z",
   "submissions": [
     {
       "id": "c1",
@@ -12,7 +12,9 @@
       "reservation": "לא",
       "lat": 31.756765,
       "lon": 34.987091,
-      "submittedAt": "2026-10-07T18:21:30.936Z"
+      "submittedAt": "2026-10-07T18:21:30.936Z",
+      "confirmations": 0,
+      "verified": false
     },
     {
       "id": "c2",
@@ -25,7 +27,9 @@
       "website": "https://order.bitetech.co.il/#/396/home",
       "lat": 31.800909,
       "lon": 35.227713,
-      "submittedAt": "2026-10-07T18:33:26.338Z"
+      "submittedAt": "2026-10-07T18:33:26.338Z",
+      "confirmations": 0,
+      "verified": false
     }
   ],
   "versions": {}

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-07T18:52:16.432Z",
+  "generated": "2026-10-07T19:38:01.184Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
     "total": 643,
@@ -976,6 +976,7 @@
       "image": "",
       "link": "",
       "modified": "2026-10-07T18:33:26.338Z",
+      "verified": false,
       "website": "https://order.bitetech.co.il/#/396/home",
       "precision": "address",
       "lat": 31.800909,
@@ -4582,6 +4583,7 @@
       "image": "",
       "link": "",
       "modified": "2026-10-07T18:21:30.936Z",
+      "verified": false,
       "delivery": "כן",
       "reservation": "לא",
       "precision": "address",
