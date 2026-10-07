@@ -29,7 +29,17 @@ export async function jdnRecords(env) {
   return byId;
 }
 
-/** A jdn record in the shape of our form fields (their `kashrut` is our `hechsher`). */
-export const asFields = (r) => ({
-  name: r.name, address: r.address, city: r.city, type: r.type, hechsher: r.kashrut, phone: r.phone,
-});
+/**
+ * A jdn record in the shape of our form fields (their `kashrut` is our
+ * `hechsher`) -- jdn's own values. The map shows our corrections in the
+ * fields themselves and keeps jdn's in `upstream`; comparing corrections with
+ * the shown values would make every one look overtaken.
+ */
+export const asFields = (r) => {
+  const up = r.upstream || {};
+  const v = (prop) => up[prop] ?? r[prop];
+  return {
+    name: v('name'), address: v('address'), city: v('city'), type: v('type'),
+    hechsher: v('kashrut'), phone: v('phone'),
+  };
+};

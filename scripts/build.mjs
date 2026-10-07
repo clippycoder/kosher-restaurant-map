@@ -482,6 +482,21 @@ async function fetchCommunity() {
   }
 }
 
+/**
+ * A previous record's details as jdn has them. A corrected record carries our
+ * values in its fields and jdn's own in `upstream`; reusing the corrected ones
+ * would make every correction look "overtaken" on the next build.
+ */
+function jdnDetail(old) {
+  const up = old.upstream || {};
+  return {
+    address: up.address ?? old.address,
+    city: old.cityRaw ?? old.city,
+    phone: up.phone ?? old.phone,
+    image: old.image,
+  };
+}
+
 // The worker's field names -> properties on a record.
 const EDIT_PROPS = {
   name: 'name', address: 'address', city: 'city', type: 'type', hechsher: 'kashrut', phone: 'phone',
@@ -508,6 +523,9 @@ function applyVersions(records, versions, aliases) {
         stats.overtaken++;
         continue;
       }
+      // Keep jdn's own value beside ours: the next build reuses this record, and
+      // the worker reads this file to see what jdn has.
+      (r.upstream ||= {})[prop] = r[prop] ?? '';
       r[prop] = field === 'city' ? normalizeCity(value, aliases) : value;
       (r.edited ||= []).push(field);
       stats.applied++;
@@ -571,11 +589,14 @@ async function main() {
 
   for (const row of index) {
     const old = prevById.get(row.id);
-    const unchanged = old && old.modified === row.modified_gmt && old.address !== undefined;
+    // A corrected record from before jdn's own values were kept beside ours
+    // (no `upstream`) is fetched again, so the reuse below can't pick up ours.
+    const unchanged = old && old.modified === row.modified_gmt && old.address !== undefined &&
+      !(old.edited && !old.upstream);
 
     let detail;
     if (unchanged) {
-      detail = { address: old.address, city: old.cityRaw ?? old.city, phone: old.phone, image: old.image };
+      detail = jdnDetail(old);
       stats.reused++;
     } else {
       try {
@@ -586,7 +607,7 @@ async function main() {
         stats.failed++;
         // Keep the previous snapshot rather than dropping the restaurant.
         if (!old) continue;
-        detail = { address: old.address, city: old.cityRaw ?? old.city, phone: old.phone, image: old.image };
+        detail = jdnDetail(old);
       }
       if (stats.fetched % 25 === 0 && stats.fetched) {
         console.log(`    ${stats.fetched} fetched...`);

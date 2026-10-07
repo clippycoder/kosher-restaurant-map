@@ -862,3 +862,15 @@ test('a jdn listing with no city can be given one (base is the empty value)', as
   assert.deepEqual((await versions())['2199'].city, { value: 'אילת', base: '', acceptedAt: (await versions())['2199'].city.acceptedAt });
   assert.equal((await syncShadows(env)).dropped, 0, 'still empty upstream: the correction stays');
 });
+
+test('the map shows our corrections; the worker still compares against jdn\'s own values', async () => {
+  for (const ip of ['1.1.1.1', '2.2.2.2']) await edit({ phone: '02-999-9999' }, ip);
+  // what the next build writes: our value shown, jdn's kept in `upstream`
+  const rec = DATASET.restaurants.find((r) => r.id === 2699);
+  rec.phone = '029999999';
+  rec.upstream = { phone: '02-53-770-00' };
+  resetDatasetCache();
+  assert.deepEqual(await syncShadows(env), { refreshed: 1, dropped: 0, held: 0, released: 0 },
+    'the correction is not mistaken for jdn having changed the phone');
+  assert.equal((await versions())['2699'].phone.value, '029999999');
+});
