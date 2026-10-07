@@ -129,6 +129,10 @@ function photonUrl(q, mode, b, limit) {
   url.searchParams.set('q', q);
   url.searchParams.set('limit', String(limit));
   url.searchParams.set('bbox', ISRAEL_BBOX);
+  // OSM's own (Hebrew) names, whatever the browser's language. Without this
+  // Photon follows Accept-Language, and an English browser got "Paran 9,
+  // Jerusalem" instead of "פארן 9, ירושלים" -- stored that way and held.
+  url.searchParams.set('lang', 'default');
   if (mode === 'settlement') {
     for (const v of SETTLEMENTS) url.searchParams.append('osm_tag', `place:${v}`);
   }
