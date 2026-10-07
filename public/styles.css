@@ -320,6 +320,20 @@ button:focus-visible {
 
 .leaflet-popup-content { margin: 11px 13px; }
 
+/* "Show all pins", under the zoom buttons. */
+.pins-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  background: var(--bg);
+  font-size: 12.5px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+.pins-toggle input { margin: 0; accent-color: var(--accent); }
+
 /* ---------- mobile ---------- */
 
 @media (max-width: 760px) {
@@ -334,26 +348,25 @@ button:focus-visible {
   #add-restaurant { padding: 0 11px; font-size: 13px; }
   #filters-toggle { padding: 0 10px; }
 
+  /* The sheet lives at the right edge, under the Filters button, and slides
+     fully off to the right when closed. Physical left/right on purpose: the
+     layout is the Hebrew one in both languages, and the earlier logical
+     insets put it at the left edge with ~40px peeking in at the right. */
   #sidebar {
     position: fixed;
-    inset-block: var(--header-h) 0;
-    inset-inline-start: 0;
+    top: var(--header-h);
+    bottom: 0;
+    right: 0;
+    left: auto;
     width: min(88vw, 340px);
     flex: none;
     z-index: 1100;
-    transform: translateX(-102%);
+    transform: translateX(102%);
     transition: transform .22s ease;
     box-shadow: 0 0 22px rgba(0, 0, 0, .3);
     border: 0;
   }
-  /* RTL: the sheet slides in from the right */
-  html[dir="rtl"] #sidebar {
-    inset-inline-start: auto;
-    inset-inline-end: 0;
-    transform: translateX(102%);
-  }
-  #sidebar.open,
-  html[dir="rtl"] #sidebar.open { transform: translateX(0); }
+  #sidebar.open { transform: translateX(0); }
 
   #unmapped { bottom: 14px; }
   .options.scroll { max-height: 180px; }
@@ -483,6 +496,6 @@ html[data-i18n-pending] body { visibility: hidden; }
    nor #unmapped, whose inset does (its contents are turned instead). */
 html[lang="en"] :is(.brand, .add-prompt, #filters-toggle, #add-restaurant,
                     #sidebar-scroll, #status, #unmapped-toggle, #unmapped-list,
-                    .leaflet-popup-content) {
+                    .leaflet-popup-content, .pins-toggle) {
   direction: ltr;
 }

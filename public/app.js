@@ -51,9 +51,13 @@
     selected: { types: new Set(), areas: new Set(), cities: new Set(), hechsherim: new Set() },
     query: '',
     citySearch: '',
+    // Grouped pins (clusters that split as you zoom) by default; "show all
+    // pins" draws every restaurant as its own pin.
+    allPins: false,
   };
 
-  let map, cluster;
+  let map, cluster, plain;
+  const pinLayer = () => (state.allPins ? plain : cluster);
 
   // -------------------------------------------------------------------------
   // filtering
@@ -154,14 +158,16 @@
     return box;
   }
 
-  function renderMarkers(rows) {
+  function renderMarkers(rows, { fit = true } = {}) {
     cluster.clearLayers();
+    plain.clearLayers();
     const mapped = rows.filter((r) => r.lat !== null && r.lon !== null);
     const markers = mapped.map((r) =>
       L.marker([r.lat, r.lon], { title: r.name }).bindPopup(() => popupFor(r)));
-    cluster.addLayers(markers);
+    if (state.allPins) markers.forEach((m) => plain.addLayer(m));
+    else cluster.addLayers(markers);
 
-    if (mapped.length) {
+    if (mapped.length && fit) {
       map.fitBounds(L.latLngBounds(mapped.map((r) => [r.lat, r.lon])),
         { padding: [40, 40], maxZoom: 15 });
     }
@@ -260,6 +266,7 @@
       if (sel.size) parts.push(`${key}=${[...sel].map(encodeURIComponent).join(',')}`);
     }
     if (state.query) parts.push(`q=${encodeURIComponent(state.query)}`);
+    if (state.allPins) parts.push('p=all');
     const hash = parts.join('&');
     history.replaceState(null, '', hash ? `#${hash}` : location.pathname + location.search);
   }
@@ -272,6 +279,7 @@
       const v = params.get(key);
       if (v) state.selected[facet] = new Set(v.split(',').filter(Boolean));
     }
+    state.allPins = params.get('p') === 'all';
     const q = params.get('q');
     if (q) {
       state.query = q.toLowerCase();
@@ -283,7 +291,7 @@
   // update cycle
   // -------------------------------------------------------------------------
 
-  function update() {
+  function update({ fit = true } = {}) {
     const rows = filtered(null);
 
     for (const facet of Object.keys(FACETS)) renderFacet(facet);
@@ -291,7 +299,7 @@
       btn.hidden = state.selected[btn.dataset.clear].size === 0;
     }
 
-    const mappedCount = renderMarkers(rows);
+    const mappedCount = renderMarkers(rows, { fit });
     renderUnmapped(rows);
 
     const total = state.meta.counts.total;
@@ -378,7 +386,28 @@
       maxClusterRadius: 55,
       spiderfyOnMaxZoom: true,
     });
-    map.addLayer(cluster);
+    plain = L.featureGroup();
+
+    // "Show all pins": a checkbox on the map, under the zoom buttons.
+    const PinsControl = L.Control.extend({
+      options: { position: 'topleft' },
+      onAdd() {
+        const box = L.DomUtil.create('label', 'pins-toggle leaflet-bar');
+        const input = L.DomUtil.create('input', '', box);
+        input.type = 'checkbox';
+        input.id = 'all-pins';
+        L.DomUtil.create('span', '', box).textContent = t('pins.all');
+        L.DomEvent.disableClickPropagation(box);
+        input.addEventListener('change', () => {
+          state.allPins = input.checked;
+          map.removeLayer(state.allPins ? cluster : plain);
+          map.addLayer(pinLayer());
+          update({ fit: false }); // same view, different pins
+        });
+        return box;
+      },
+    });
+    map.addControl(new PinsControl());
 
     try {
       const res = await fetch(DATA_URL, { cache: 'no-cache' });
@@ -404,6 +433,8 @@
     );
 
     readHash();
+    $('all-pins').checked = state.allPins;
+    map.addLayer(pinLayer());
     wireUp();
     update();
   }
