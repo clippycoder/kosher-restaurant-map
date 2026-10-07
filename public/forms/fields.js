@@ -107,6 +107,22 @@ export const matchKey = (v) => String(v ?? '')
   // Includes the Hebrew maqaf (־) and the other dash variants.
   .replace(/[\s"'`׳״‘’“”\-‐‑‒–—―−־.,:;!?()/|]/g, '');
 
+const PHONE_FIELDS = new Set(['phone', 'whatsapp']);
+
+/**
+ * "The same info", for edits: phones compare as numbers, everything else
+ * ignoring case, spacing and punctuation. Used by the worker to match edits
+ * and by the build to decide whether an accepted edit still applies.
+ */
+export function sameValue(field, a, b) {
+  if (PHONE_FIELDS.has(field)) {
+    const x = normalizePhone(a);
+    const y = normalizePhone(b);
+    if (x && y) return x === y;
+  }
+  return matchKey(a) === matchKey(b);
+}
+
 // Bot trap: a field humans never see. Anything in it means the post is dropped.
 export const HONEYPOT = 'company';
 

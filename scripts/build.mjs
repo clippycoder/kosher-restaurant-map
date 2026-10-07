@@ -22,6 +22,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getGazetteer, lookup as gazLookup, stripStreetPrefix } from './gazetteer.mjs';
+import { sameValue } from '../public/forms/fields.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // data/ holds build state (geocode cache, hand-maintained fixups) and is not
@@ -33,6 +34,9 @@ const OUTPUT = path.join(PUBLIC_DATA, 'restaurants.json');
 const SITE = 'https://rest.jdn.co.il';
 const API = `${SITE}/wp-json/wp/v2`;
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
+// Our own submissions and accepted edits (worker/). Public endpoints only.
+const SUBMISSIONS_API = (process.env.SUBMISSIONS_API ||
+  'https://kosher-map-submissions.clippycoder.workers.dev').replace(/\/$/, '');
 
 // Nominatim's usage policy requires an identifying User-Agent and at most one
 // request per second. Both are why geocoding lives here and not in the browser.
@@ -453,6 +457,88 @@ function unifySpellings(records) {
 // main
 // ---------------------------------------------------------------------------
 
+// --- community ------------------------------------------------------------
+
+/**
+ * Published submissions and accepted edits from the worker. Kept in
+ * data/community.json; when the worker can't be reached the last good copy is
+ * used, so a blip never removes community restaurants or reverts edits. The
+ * file is rewritten only when the content changes, so quiet days commit nothing.
+ */
+async function fetchCommunity() {
+  const saved = await readJson('community.json', null);
+  try {
+    const [pub, ver] = await Promise.all(['published', 'versions'].map(async (p) =>
+      (await request(`${SUBMISSIONS_API}/api/${p}`, { tries: 3, timeoutMs: 20_000 })).json()));
+    const fresh = { submissions: pub.submissions || [], versions: ver.versions || {} };
+    const same = saved && JSON.stringify({ submissions: saved.submissions, versions: saved.versions }) ===
+      JSON.stringify(fresh);
+    if (!same) await writeJson('community.json', { fetched: new Date().toISOString(), ...fresh });
+    return fresh;
+  } catch (err) {
+    console.warn(`  ! community API unreachable (${err.message}); ` +
+      (saved ? `using the copy from ${saved.fetched}` : 'no saved copy, none included'));
+    return saved || { submissions: [], versions: {} };
+  }
+}
+
+// The worker's field names -> properties on a record.
+const EDIT_PROPS = {
+  name: 'name', address: 'address', city: 'city', type: 'type', hechsher: 'kashrut', phone: 'phone',
+  description: 'description', whatsapp: 'whatsapp', website: 'website', hours: 'hours',
+  delivery: 'delivery', accessible: 'accessible', reservation: 'reservation',
+};
+const EXTRA_FIELDS = ['description', 'whatsapp', 'website', 'hours', 'delivery', 'accessible', 'reservation'];
+
+/**
+ * Our accepted values over jdn's, field by field. Each one applies only while
+ * jdn's own value still equals the one it replaced (`base`); once jdn changes
+ * that field, theirs wins. Runs after city normalization, because `base` was
+ * recorded from the map, where cities are already normalized.
+ */
+function applyVersions(records, versions, aliases) {
+  const stats = { applied: 0, overtaken: 0 };
+  for (const r of records) {
+    const v = versions[String(r.id)];
+    if (!v) continue;
+    for (const [field, { value, base }] of Object.entries(v)) {
+      const prop = EDIT_PROPS[field];
+      if (!prop) continue;
+      if (!sameValue(field, base, r[prop] ?? '')) {
+        stats.overtaken++;
+        continue;
+      }
+      r[prop] = field === 'city' ? normalizeCity(value, aliases) : value;
+      (r.edited ||= []).push(field);
+      stats.applied++;
+    }
+  }
+  return stats;
+}
+
+/** A published submission as a map record, marked as the community's. */
+function communityRecord(s, aliases) {
+  const r = {
+    id: s.id,
+    source: 'community',
+    name: s.name,
+    address: s.address || '',
+    cityRaw: s.city || '',
+    city: normalizeCity(s.city, aliases),
+    area: '',
+    kashrut: s.hechsher || '',
+    type: s.type || '',
+    phone: s.phone || '',
+    image: '',
+    link: '',
+    modified: s.submittedAt,
+  };
+  for (const k of EXTRA_FIELDS) if (s[k]) r[k] = s[k];
+  // Picked from the form's address suggestions: the place's own coordinates.
+  if (Number.isFinite(s.lat) && Number.isFinite(s.lon)) r.given = [s.lat, s.lon];
+  return r;
+}
+
 async function main() {
   const started = Date.now();
   console.log(SAMPLE ? '== SAMPLE RUN (5 records) ==' : '== full build ==');
@@ -538,6 +624,33 @@ async function main() {
   for (const r of records) r.city = normalizeCity(r.cityRaw, cityAliases);
   unifySpellings(records);
 
+  if (!SAMPLE) {
+    console.log('- community');
+    const community = await fetchCommunity();
+    const edits = applyVersions(records, community.versions, cityAliases);
+    const added = community.submissions.map((s) => communityRecord(s, cityAliases));
+    records.push(...added);
+    // Once more over everything, so a submitted spelling joins jdn's.
+    unifySpellings(records);
+
+    // Submissions carry no region; take the one jdn's listings give the city.
+    const areaCount = new Map();
+    for (const r of records) {
+      if (r.source === 'community' || !r.city || !r.area) continue;
+      const m = areaCount.get(r.city) || new Map();
+      m.set(r.area, (m.get(r.area) || 0) + 1);
+      areaCount.set(r.city, m);
+    }
+    for (const r of added) {
+      const m = areaCount.get(r.city);
+      r.area = m ? [...m.entries()].sort((a, b) => b[1] - a[1])[0][0] : '';
+      if (!/[\u05D0-\u05EA]/.test(r.city)) console.warn(`  ! ${r.id}: city "${r.city}" is not in Hebrew`);
+    }
+    console.log(`  submissions=${added.length} edits applied=${edits.applied} ` +
+                `overtaken by jdn=${edits.overtaken}` +
+                (added.some((r) => !r.area) ? ` (no region for: ${added.filter((r) => !r.area).map((r) => r.id).join(', ')})` : ''));
+  }
+
   // The address sometimes names a different town than the city field. That is a
   // genuine upstream error and no rule can say which field is right, so surface
   // it for a human instead of silently trusting one.
@@ -556,7 +669,7 @@ async function main() {
   }
 
   console.log('- geocoding');
-  const geoStats = { cached: 0, hit: 0, miss: 0, error: 0, override: 0, skipped: 0 };
+  const geoStats = { cached: 0, hit: 0, miss: 0, error: 0, override: 0, skipped: 0, given: 0 };
   const gazStats = { address: 0, street: 0, cities: 0, rejected: 0 };
 
   // City centres first: they anchor the distance check, drive the radius
@@ -647,6 +760,19 @@ async function main() {
     r.lon = null;
     let gazHit = null;
 
+    // A submission whose address was picked from the form's suggestions brings
+    // the place's own coordinates. Trusted only inside its town, like any result.
+    if (r.given) {
+      const [lat, lon] = r.given;
+      delete r.given;
+      if (plausible(r.city, lat, lon)) {
+        Object.assign(r, { precision: 'address', lat, lon });
+        geoStats.given++;
+        continue;
+      }
+      console.warn(`  ! ${r.id}: submitted coordinates are not in ${r.city}; geocoding the address instead`);
+    }
+
     // 1. Local OSM gazetteer -- exact house numbers, no text-matching guesswork.
     // Results are memoised into geocache.json under a `gaz:` key so that later
     // builds (notably in CI, which starts with an empty .cache/) never have to
@@ -734,7 +860,7 @@ async function main() {
               `(${gazStats.cities} cities); ${gazStats.rejected} wrong-town results rejected`);
   console.log(`  cached=${geoStats.cached} new=${geoStats.hit} miss=${geoStats.miss} ` +
               `override=${geoStats.override} error=${geoStats.error} ` +
-              `no-city=${geoStats.skipped}`);
+              `no-city=${geoStats.skipped} submitted-coordinates=${geoStats.given}`);
 
   // -- facets ---------------------------------------------------------------
   const tally = (key) => {
@@ -775,7 +901,12 @@ async function main() {
   const payload = {
     generated: new Date().toISOString(),
     source: SITE,
-    counts: { total: records.length, mapped, unmapped: records.length - mapped },
+    counts: {
+      total: records.length,
+      mapped,
+      unmapped: records.length - mapped,
+      community: records.filter((r) => r.source === 'community').length,
+    },
     facets: {
       cities,
       areas: tally('area'),

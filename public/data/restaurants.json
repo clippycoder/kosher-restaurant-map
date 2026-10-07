@@ -1,16 +1,17 @@
 {
-  "generated": "2026-10-07T17:41:08.588Z",
+  "generated": "2026-10-07T18:38:40.936Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
-    "total": 641,
-    "mapped": 624,
-    "unmapped": 17
+    "total": 643,
+    "mapped": 626,
+    "unmapped": 17,
+    "community": 2
   },
   "facets": {
     "cities": [
       {
         "name": "ירושלים",
-        "count": 147,
+        "count": 148,
         "area": "ירושלים"
       },
       {
@@ -25,7 +26,7 @@
       },
       {
         "name": "בית שמש",
-        "count": 27,
+        "count": 28,
         "area": "מרכז"
       },
       {
@@ -532,11 +533,11 @@
     "areas": [
       {
         "name": "מרכז",
-        "count": 228
+        "count": 229
       },
       {
         "name": "ירושלים",
-        "count": 191
+        "count": 192
       },
       {
         "name": "צפון",
@@ -566,7 +567,7 @@
       },
       {
         "name": "בד״ץ העדה״ח ירושלים",
-        "count": 39
+        "count": 40
       },
       {
         "name": "הרב לנדא",
@@ -574,7 +575,7 @@
       },
       {
         "name": "הרב רובין",
-        "count": 27
+        "count": 28
       },
       {
         "name": "חוג חת״ס ב״ב",
@@ -612,7 +613,7 @@
       },
       {
         "name": "בשרי",
-        "count": 271
+        "count": 273
       },
       {
         "name": "פרווה",
@@ -960,6 +961,25 @@
       "precision": "address",
       "lat": 32.0964635,
       "lon": 34.7730199
+    },
+    {
+      "id": "c2",
+      "source": "community",
+      "name": "אין בורגר",
+      "address": "פארן 9",
+      "cityRaw": "ירושלים",
+      "city": "ירושלים",
+      "area": "ירושלים",
+      "kashrut": "הרב רובין",
+      "type": "בשרי",
+      "phone": "025363777",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-07T18:33:26.338Z",
+      "website": "https://order.bitetech.co.il/#/396/home",
+      "precision": "address",
+      "lat": 31.800909,
+      "lon": 35.227713
     },
     {
       "id": 762,
@@ -4547,6 +4567,26 @@
       "precision": "address",
       "lat": 31.8178328,
       "lon": 35.1944519
+    },
+    {
+      "id": "c1",
+      "source": "community",
+      "name": "זלמנ׳ס",
+      "address": "ביג בית שמש, שדרות יגאל אלון",
+      "cityRaw": "בית שמש",
+      "city": "בית שמש",
+      "area": "מרכז",
+      "kashrut": "בד״ץ העדה״ח ירושלים",
+      "type": "בשרי",
+      "phone": "",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-07T18:21:30.936Z",
+      "delivery": "כן",
+      "reservation": "לא",
+      "precision": "address",
+      "lat": 31.756765,
+      "lon": 34.987091
     },
     {
       "id": 562,

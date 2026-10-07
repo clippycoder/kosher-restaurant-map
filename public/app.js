@@ -37,6 +37,8 @@
 
   /** Only http(s) URLs reach an href/src: every field here is scraped content. */
   const safeUrl = (u) => {
+    // Empty is not a link -- new URL('', base) would quietly be this very page.
+    if (!u) return null;
     try {
       const parsed = new URL(u, location.href);
       return /^https?:$/.test(parsed.protocol) ? parsed.href : null;
@@ -101,8 +103,13 @@
     row(t('pop.kashrut'), r.kashrut);
     row(t('pop.type'), r.type);
     row(t('pop.phone'), r.phone);
+    row(t('pop.hours'), r.hours);
 
     const box = el('div', { class: 'pop' }, [el('h3', { text: r.name })]);
+    if (r.source === 'community') {
+      box.appendChild(el('p', { class: 'badge', text: t('pop.community') }));
+    }
+    if (r.description) box.appendChild(el('p', { class: 'desc', text: r.description }));
 
     const imgSrc = safeUrl(r.image);
     if (imgSrc) {
@@ -131,6 +138,17 @@
     }
     if (r.phone) {
       links.appendChild(el('a', { href: `tel:${r.phone.replace(/[^\d+]/g, '')}`, text: t('pop.call') }));
+    }
+    const site = safeUrl(r.website);
+    if (site) {
+      links.appendChild(el('a', { href: site, target: '_blank', rel: 'noopener noreferrer nofollow', text: t('pop.website') }));
+    }
+    if (r.whatsapp) {
+      // wa.me wants the international form: 054... -> 97254...
+      const digits = r.whatsapp.replace(/[^\d]/g, '').replace(/^0/, '972');
+      links.appendChild(el('a', {
+        href: `https://wa.me/${digits}`, target: '_blank', rel: 'noopener noreferrer', text: t('pop.whatsapp'),
+      }));
     }
     box.appendChild(links);
     return box;

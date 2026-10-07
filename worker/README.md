@@ -15,6 +15,7 @@ daily build pulls published entries and locates them like any other record.
 form ──POST /api/submissions──▶ validate ─▶ captcha ─▶ rate limit ─▶ screen
                                                                      │
                                   clean ─▶ published ─▶ GET /api/published ─▶ daily build ─▶ map
+                                                      GET /api/versions ──┘  (accepted edits of jdn listings)
                                 flagged ─▶ held ─▶ moderator: publish / reject / edit
 ```
 

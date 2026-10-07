@@ -100,6 +100,23 @@ see `worker/README.md` for screening, edits of jdn listings, and moderation.
 - The advanced section links to [בהשגחה's own form](https://rest.jdn.co.il/add-res-2/),
   noting that their submissions wait for their approval.
 
+**Reaching the map.** The daily build reads the worker's two public lists --
+published submissions (`/api/published`) and accepted edits of jdn listings
+(`/api/versions`) -- and keeps a copy in `data/community.json`, used if the
+worker is unreachable so a blip never drops community restaurants.
+
+- Accepted edits apply field by field, and only while jdn's value for that field
+  is still the one the edit replaced; once jdn changes it, jdn's value wins.
+- Submissions become records with `source: "community"` (ids `c1`, `c2`...),
+  labelled in the popup. Their region is the one jdn's listings give their
+  city. A submission picked from the address suggestions brings coordinates,
+  used if they fall inside its town; otherwise it is geocoded like any address.
+- `scripts/verify.mjs` compares only jdn's listings with jdn's live counts, and
+  checks community records are in Hebrew with jdn's exact hechsher spellings.
+
+A new submission therefore appears with the next daily build (03:00 UTC), or
+at once with `gh workflow run build.yml`.
+
 The form states on the page what it stores: the submitted details, private
 phones visible only to the moderator, and a one-way hash of the IP kept 30 days.
 
@@ -133,6 +150,7 @@ on the map and in what the form stores. Validation errors travel as codes
 | `data/geocache.json` | **Generated.** Permanent geocode memo, including misses. |
 | `data/overrides.json` | **Hand-edited.** Forced coordinates for addresses Nominatim gets wrong. |
 | `data/city-aliases.json` | **Hand-edited.** City spelling variant → canonical name. |
+| `data/community.json` | **Generated.** Last good copy of the worker's published submissions and accepted edits. |
 
 `data/` holds build state and is not published; `public/data/` holds the one document
 the site serves.

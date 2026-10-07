@@ -23,6 +23,10 @@ const ok = (label, pass, detail = '') => {
 const data = JSON.parse(
   await readFile(path.join(ROOT, 'public', 'data', 'restaurants.json'), 'utf8'));
 const rows = data.restaurants;
+// Community submissions (worker/) are ours, not jdn's: every comparison with
+// the live jdn API counts jdn's listings only.
+const jdnRows = rows.filter((r) => r.source !== 'community');
+const communityRows = rows.filter((r) => r.source === 'community');
 
 // --- filter semantics, mirroring public/app.js ------------------------------
 const FACETS = { types: 'type', areas: 'area', cities: 'city', hechsherim: 'kashrut' };
@@ -43,6 +47,7 @@ function select(sel = {}, q = '') {
 
 const facetCount = (facet, name) =>
   data.facets[facet].find((f) => f.name === name)?.count ?? 0;
+const jdnCount = (facet, name) => jdnRows.filter((r) => r[FACETS[facet]] === name).length;
 
 // --- 1. live counts ---------------------------------------------------------
 console.log('\n1. dataset vs. live API');
@@ -56,8 +61,11 @@ const liveTax = async (name) => {
 const idxRes = await fetch(`${API}/rest?per_page=1&_fields=id`, { headers: { 'User-Agent': UA } });
 const liveTotal = Number(idxRes.headers.get('x-wp-total'));
 
-ok('record count matches the API', data.counts.total === liveTotal,
-  `dataset=${data.counts.total} live=${liveTotal}`);
+ok('jdn record count matches the API', jdnRows.length === liveTotal,
+  `dataset=${jdnRows.length} live=${liveTotal}`);
+ok('total = jdn + community', data.counts.total === jdnRows.length + communityRows.length &&
+  (data.counts.community ?? 0) === communityRows.length,
+  `${data.counts.total} = ${jdnRows.length} + ${communityRows.length}`);
 
 // A post can carry more than one term (live area counts sum to 650 across 641
 // posts), and we keep only the primary. So ours must never EXCEED live, and the
@@ -65,8 +73,8 @@ ok('record count matches the API', data.counts.total === liveTotal,
 for (const [tax, facet] of [['restype', 'types'], ['area', 'areas'], ['hechsher', 'hechsherim']]) {
   const live = await liveTax(tax);
   const over = [...live.entries()]
-    .filter(([name, count]) => facetCount(facet, name) > count)
-    .map(([name, count]) => `${name}: live=${count} ours=${facetCount(facet, name)}`);
+    .filter(([name, count]) => jdnCount(facet, name) > count)
+    .map(([name, count]) => `${name}: live=${count} ours=${jdnCount(facet, name)}`);
   ok(`${facet} never exceeds the ${tax} taxonomy counts`, over.length === 0, over.join('; '));
 
   const unknown = data.facets[facet]
@@ -179,8 +187,25 @@ const q = rows[0].name.slice(0, 4);
 ok('free-text search matches by name', select({}, q).some((r) => r.id === rows[0].id),
   `"${q}"`);
 
-// --- 4. shape ---------------------------------------------------------------
-console.log('\n4. payload shape');
+// --- 4. community -----------------------------------------------------------
+console.log('\n4. community submissions');
+console.log(`  INFO  ${communityRows.length} community records, ` +
+  `${jdnRows.filter((r) => r.edited).length} jdn records carry accepted edits`);
+const heb = /[\u05D0-\u05EA]/;
+ok('community ids are c<number>', communityRows.every((r) => /^c\d+$/.test(r.id)));
+ok('community places are in Hebrew', communityRows.every((r) => heb.test(r.city) && heb.test(r.address)),
+  communityRows.filter((r) => !heb.test(r.city) || !heb.test(r.address)).map((r) => r.id).join(', '));
+ok('no build-internal fields leak into the output', rows.every((r) => !('given' in r)));
+// Spelled exactly as jdn spells them, or the hechsher filter would split.
+const jdnHechsherim = new Set(jdnRows.map((r) => r.kashrut));
+const jdnTypes = new Set(jdnRows.map((r) => r.type));
+ok('community hechsherim and types use jdn\'s exact spellings',
+  communityRows.every((r) => jdnHechsherim.has(r.kashrut) && jdnTypes.has(r.type)),
+  communityRows.filter((r) => !jdnHechsherim.has(r.kashrut) || !jdnTypes.has(r.type))
+    .map((r) => `${r.id}: ${r.kashrut}/${r.type}`).join(', '));
+
+// --- 5. shape ---------------------------------------------------------------
+console.log('\n5. payload shape');
 
 const required = ['id', 'name', 'address', 'city', 'area', 'kashrut', 'type', 'link', 'lat', 'lon'];
 const missing = rows.filter((r) => required.some((k) => !(k in r)));

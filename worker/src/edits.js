@@ -16,24 +16,13 @@
  * the restaurant's other fields stay.
  */
 
-import { EDIT_FIELDS, EDITABLE, matchKey, normalizePhone } from '../../public/forms/fields.js';
+import { EDIT_FIELDS, EDITABLE, sameValue } from '../../public/forms/fields.js';
 import { jdnRecords, asFields } from './dataset.js';
 import { spamFlags } from './screen.js';
 import { intake } from './intake.js';
 import { json, readBody } from './http.js';
 
-const PHONE_FIELDS = new Set(['phone', 'whatsapp']);
 export const CORROBORATION_GAP_MS = 60 * 60 * 1000;
-
-/** "The same info": phones compare as numbers, everything else ignoring case, spacing and punctuation. */
-export function sameValue(field, a, b) {
-  if (PHONE_FIELDS.has(field)) {
-    const x = normalizePhone(a);
-    const y = normalizePhone(b);
-    if (x && y) return x === y;
-  }
-  return matchKey(a) === matchKey(b);
-}
 
 const jdnValue = (fields, key) => fields[key] ?? '';
 
