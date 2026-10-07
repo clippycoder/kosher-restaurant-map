@@ -8,8 +8,9 @@
  * (service "kosher-map-admin-token"). SUBMISSIONS_API and ADMIN_TOKEN override
  * them, e.g. SUBMISSIONS_API=http://localhost:8787 against `wrangler dev`.
  *
- *   list                                   your listings, newest first, with their status
- *   list held|published|rejected           only those (held = waiting for your review)
+ *   list                                   what's waiting for your review (held), with why
+ *   list mine                              all your listings, newest first, with their status
+ *   list published|rejected                only those
  *   list shadows                           corrected copies of בהשגחה listings
  *   show <id>
  *   publish <id> [note]                    held -> on the map
@@ -113,9 +114,9 @@ const note = () => args.slice(1).join(' ') || undefined;
 
 switch (cmd) {
   case 'list': {
-    const which = args[0] || 'mine';
+    const which = args[0] || 'held';
     if (!['mine', 'shadows', 'held', 'published', 'rejected', 'all'].includes(which)) {
-      console.error('list [held|published|rejected|shadows|all]');
+      console.error('list [mine|published|rejected|shadows|all]');
       process.exit(2);
     }
     const status = ['held', 'published', 'rejected'].includes(which) ? which : 'all';
