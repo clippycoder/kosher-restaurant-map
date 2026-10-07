@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-07T23:48:03.926Z",
+  "generated": "2026-10-07T23:53:01.040Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
     "total": 646,
@@ -575,7 +575,7 @@
       },
       {
         "name": "הרב רובין",
-        "count": 29
+        "count": 30
       },
       {
         "name": "חוג חת״ס ב״ב",
@@ -583,7 +583,7 @@
       },
       {
         "name": "רבנות ירושלים מהדרין",
-        "count": 21
+        "count": 20
       },
       {
         "name": "קהילות",
@@ -7902,13 +7902,19 @@
       "address": "תחנה מרכזית, יפו 228, ירושלים",
       "cityRaw": "ירושלים",
       "area": "ירושלים",
-      "kashrut": "רבנות ירושלים מהדרין",
+      "kashrut": "הרב רובין",
       "type": "חלבי",
       "phone": "1700506070",
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/12/פיצה-האט-6.jpg",
       "link": "https://rest.jdn.co.il/rest/1644/",
       "modified": "2022-12-15T12:31:23",
       "city": "ירושלים",
+      "upstream": {
+        "kashrut": "רבנות ירושלים מהדרין"
+      },
+      "edited": [
+        "hechsher"
+      ],
       "precision": "address",
       "lat": 31.7888612,
       "lon": 35.202168
