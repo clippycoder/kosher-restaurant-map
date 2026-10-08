@@ -1,11 +1,11 @@
 {
-  "generated": "2026-10-08T01:14:35.869Z",
+  "generated": "2026-10-08T10:06:13.842Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
-    "total": 650,
-    "mapped": 650,
+    "total": 651,
+    "mapped": 651,
     "unmapped": 0,
-    "community": 9
+    "community": 10
   },
   "facets": {
     "cities": [
@@ -26,7 +26,7 @@
       },
       {
         "name": "בית שמש",
-        "count": 34,
+        "count": 35,
         "area": "מרכז"
       },
       {
@@ -533,7 +533,7 @@
     "areas": [
       {
         "name": "מרכז",
-        "count": 231
+        "count": 232
       },
       {
         "name": "ירושלים",
@@ -567,7 +567,7 @@
       },
       {
         "name": "הרב מחפוד",
-        "count": 42
+        "count": 43
       },
       {
         "name": "הרב לנדא",
@@ -613,7 +613,7 @@
       },
       {
         "name": "בשרי",
-        "count": 274
+        "count": 275
       },
       {
         "name": "פרווה",
@@ -2290,6 +2290,26 @@
       "precision": "address",
       "lat": 32.0055998,
       "lon": 34.9466684
+    },
+    {
+      "id": "c29",
+      "source": "community",
+      "name": "בורגרס בר",
+      "address": "חלחת יהושע 2",
+      "cityRaw": "בית שמש",
+      "city": "בית שמש",
+      "area": "מרכז",
+      "kashrut": "הרב מחפוד",
+      "type": "בשרי",
+      "phone": "0795912242",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-08T01:16:55.275Z",
+      "verified": false,
+      "website": "https://burgersbar.co.il/",
+      "precision": "address",
+      "lat": 31.707459,
+      "lon": 34.9960893
     },
     {
       "id": 2199,
