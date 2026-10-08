@@ -104,42 +104,28 @@
   // rendering: markers
   // -------------------------------------------------------------------------
 
-  // A ✎ beside a detail the community corrected on a בהשגחה listing.
-  const editedMark = () => el('span', {
-    class: 'edited-mark', text: '✎', title: t('pop.editedField'), 'aria-label': t('pop.editedField'),
-  });
-
   function popupFor(r) {
-    // Which details of this בהשגחה listing come from community corrections.
-    const edited = new Set(r.source === 'community' ? [] : r.edited || []);
     const dl = el('dl');
-    const row = (label, value, fields) => {
+    const row = (label, value) => {
       if (!value) return;
       dl.appendChild(el('dt', { text: label }));
       // dir=auto: Hebrew data reads right to left even on the English page.
-      const dd = el('dd', { text: value, dir: 'auto' });
-      if (fields.some((f) => edited.has(f))) dd.appendChild(editedMark());
-      dl.appendChild(dd);
+      dl.appendChild(el('dd', { text: value, dir: 'auto' }));
     };
-    row(t('pop.address'), [r.address, r.city].filter(Boolean).join(', '), ['address', 'city']);
-    row(t('pop.kashrut'), r.kashrut, ['hechsher']);
-    row(t('pop.type'), r.type, ['type']);
-    row(t('pop.phone'), r.phone, ['phone']);
-    row(t('pop.hours'), r.hours, ['hours']);
+    row(t('pop.address'), [r.address, r.city].filter(Boolean).join(', '));
+    row(t('pop.kashrut'), r.kashrut);
+    row(t('pop.type'), r.type);
+    row(t('pop.phone'), r.phone);
+    row(t('pop.hours'), r.hours);
 
-    const title = el('h3', { text: r.name, dir: 'auto' });
-    if (edited.has('name')) title.appendChild(editedMark());
-    const box = el('div', { class: 'pop' }, [title]);
+    const box = el('div', { class: 'pop' }, [el('h3', { text: r.name, dir: 'auto' })]);
     if (r.source === 'community') {
       box.appendChild(el('p', { class: 'badge', text: t('pop.community') }));
-    } else if (edited.size) {
+    } else if (r.edited?.length) {
+      // A בהשגחה listing with accepted community corrections.
       box.appendChild(el('p', { class: 'badge updated', text: t('pop.updated') }));
     }
-    if (r.description) {
-      const desc = el('p', { class: 'desc', text: r.description, dir: 'auto' });
-      if (edited.has('description')) desc.appendChild(editedMark());
-      box.appendChild(desc);
-    }
+    if (r.description) box.appendChild(el('p', { class: 'desc', text: r.description, dir: 'auto' }));
 
     const imgSrc = safeUrl(r.image);
     if (imgSrc) {

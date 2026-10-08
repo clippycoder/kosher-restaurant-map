@@ -109,9 +109,8 @@ value, or by the moderator (`moderate.mjs edits`). Community and jdn listings ar
 corrected the same way; a corrected jdn listing gets a *shadow*, our own listing
 that follows it (see `worker/README.md`). The forms share `public/forms/kit.js`.
 
-**Marking.** Community listings say "Added by the community". A בהשגחה listing
-with accepted corrections says "Updated by the community", and each corrected
-detail carries a ✎ (from the record's `edited` fields).
+**Marking.** Community listings say "Added by the community"; a בהשגחה listing
+with accepted corrections says "Updated by the community".
 
 **"Is this correct?"** Popups of community listings ask it until five different
 people (one per fingerprint, no captcha, 30 a day each) have said yes -- never
