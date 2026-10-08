@@ -56,7 +56,7 @@
     allPins: false,
   };
 
-  let map, cluster, plain;
+  let map, cluster, plain, legs;
 
   // "Show all pins" is offered, and acts, only from city-level zoom: drawing
   // every restaurant as its own pin country-wide slowed browsers down. Even
@@ -66,6 +66,67 @@
   let mappedRows = [];             // the current filter's restaurants with a pin
   const plainMarkers = new Map();  // id -> its show-all marker, made on first need
   const showingAll = () => state.allPins && map.getZoom() >= ALL_PINS_MIN_ZOOM;
+
+  // In show-all mode, pins that would cover each other are fanned out around
+  // their common spot -- on a circle, or a spiral when there are many -- with a
+  // thin leg to the real location. Same spacing as markercluster uses when you
+  // click a group, so both views look alike.
+  const OVERLAP_X = 22, OVERLAP_Y = 30;   // closer than this (px) and pins overlap
+  const CIRCLE_FOOT = 25, SPIRAL_FOOT = 28, SPIRAL_START = 11, SPIRAL_FACTOR = 5;
+  const TWO_PI = Math.PI * 2;
+
+  /** Pixel offsets (from the group's centre) for n fanned-out pins. */
+  function fanOffsets(n) {
+    const out = [];
+    if (n < 9) {
+      const radius = (CIRCLE_FOOT * (2 + n)) / TWO_PI;
+      const step = TWO_PI / n;
+      for (let i = 0; i < n; i++) {
+        out.push([radius * Math.cos(i * step), radius * Math.sin(i * step)]);
+      }
+      return out;
+    }
+    let radius = SPIRAL_START;
+    let angle = 0;
+    for (let i = 0; i < n; i++) {
+      angle += SPIRAL_FOOT / radius + i * 0.0005;
+      out.push([radius * Math.cos(angle), radius * Math.sin(angle)]);
+      radius += (TWO_PI * SPIRAL_FACTOR) / angle;
+    }
+    return out;
+  }
+
+  /** Puts each marker at its real spot, or fanned out if it overlaps others. */
+  function placePins(markers) {
+    legs.clearLayers();
+    // A fixed order, so the same pins fan out the same way as the map moves.
+    const items = markers
+      .map((m) => ({ m, p: map.latLngToLayerPoint(m.home) }))
+      .sort((a, b) => (String(a.m.rid) < String(b.m.rid) ? -1 : 1));
+    const groups = [];
+    for (const it of items) {
+      const g = groups.find((x) =>
+        Math.abs(x.seed.x - it.p.x) < OVERLAP_X && Math.abs(x.seed.y - it.p.y) < OVERLAP_Y);
+      if (g) g.items.push(it);
+      else groups.push({ seed: it.p, items: [it] });
+    }
+    for (const g of groups) {
+      if (g.items.length === 1) {
+        const m = g.items[0].m;
+        if (!m.getLatLng().equals(m.home)) m.setLatLng(m.home);
+        continue;
+      }
+      const cx = g.items.reduce((s, it) => s + it.p.x, 0) / g.items.length;
+      const cy = g.items.reduce((s, it) => s + it.p.y, 0) / g.items.length;
+      const offsets = fanOffsets(g.items.length);
+      g.items.forEach((it, i) => {
+        const to = map.layerPointToLatLng(L.point(cx + offsets[i][0], cy + offsets[i][1]));
+        if (!it.m.getLatLng().equals(to)) it.m.setLatLng(to);
+        legs.addLayer(L.polyline([it.m.home, to],
+          { weight: 1.5, color: '#444', opacity: 0.6, interactive: false }));
+      });
+    }
+  }
 
   // -------------------------------------------------------------------------
   // filtering
@@ -188,20 +249,18 @@
   function confirmBox(r, updateUrl) {
     const yes = el('button', { type: 'button', class: 'confirm-yes', text: t('confirm.yes') });
     const no = el('a', { class: 'confirm-no', href: updateUrl, text: t('confirm.no') });
-    const note = el('p', { class: 'confirm-note' });
+    const note = el('p', { class: 'confirm-note' }); // only ever an error
     const box = el('div', { class: 'confirm' }, [
       el('p', { class: 'confirm-ask', text: t('confirm.ask') }),
       el('div', { class: 'confirm-actions' }, [yes, no]),
-      note,
     ]);
 
     const show = (s) => {
       // Not asked of whoever added it, nor once verified (unless they confirmed).
       if (s.own || (s.verified && !s.mine)) { box.remove(); return; }
       if (s.mine) {
-        box.replaceChildren(el('p', { class: 'confirm-ask', text: t('confirm.thanks') }), note);
+        box.replaceChildren(el('p', { class: 'confirm-ask', text: t('confirm.thanks') }));
       }
-      note.textContent = s.count ? t('confirm.count', { n: s.count, needed: s.needed }) : '';
     };
 
     api().then(async (base) => {
@@ -224,6 +283,7 @@
       } catch {
         yes.disabled = false;
         note.textContent = t('confirm.failed');
+        if (!note.isConnected) box.appendChild(note);
       }
     });
     return box;
@@ -232,6 +292,7 @@
   const markerFor = (r) => {
     const m = L.marker([r.lat, r.lon], { title: r.name }).bindPopup(() => popupFor(r));
     m.rid = r.id;
+    m.home = L.latLng(r.lat, r.lon);
     return m;
   };
 
@@ -257,11 +318,14 @@
 
     if (!showingAll()) {
       if (map.hasLayer(plain)) map.removeLayer(plain);
+      if (map.hasLayer(legs)) map.removeLayer(legs);
       plain.clearLayers();
+      legs.clearLayers();
       if (!map.hasLayer(cluster)) map.addLayer(cluster);
       return;
     }
     if (map.hasLayer(cluster)) map.removeLayer(cluster);
+    if (!map.hasLayer(legs)) map.addLayer(legs); // under the pins: added first
     if (!map.hasLayer(plain)) map.addLayer(plain);
     const view = map.getBounds().pad(0.3);
     const wanted = new Set();
@@ -273,6 +337,7 @@
       if (!plain.hasLayer(m)) plain.addLayer(m);
     }
     for (const m of plain.getLayers()) if (!wanted.has(m.rid)) plain.removeLayer(m);
+    placePins(plain.getLayers());
   }
 
   // -------------------------------------------------------------------------
@@ -490,6 +555,7 @@
       spiderfyOnMaxZoom: true,
     });
     plain = L.featureGroup();
+    legs = L.layerGroup();
 
     // "Show all pins": a checkbox on the map, under the zoom buttons.
     const PinsControl = L.Control.extend({
