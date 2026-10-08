@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-10-07T23:53:01.010Z",
+  "fetched": "2026-10-08T01:14:33.620Z",
   "submissions": [
     {
       "id": "c1",
@@ -68,6 +68,58 @@
       "lat": 31.782063,
       "lon": 35.216782,
       "submittedAt": "2026-10-07T23:44:36.174Z",
+      "confirmations": 0,
+      "verified": false
+    },
+    {
+      "id": "c25",
+      "name": "קפה & טוסט",
+      "address": "בית ישראל 22",
+      "city": "ירושלים",
+      "type": "חלבי",
+      "hechsher": "בד״ץ העדה״ח ירושלים",
+      "lat": 31.789374,
+      "lon": 35.224521,
+      "submittedAt": "2026-10-08T00:09:00.829Z",
+      "confirmations": 0,
+      "verified": false
+    },
+    {
+      "id": "c26",
+      "name": "פיצה האט",
+      "address": "הרב ברים 4",
+      "city": "ביתר עילית",
+      "type": "חלבי",
+      "hechsher": "הרב רובין",
+      "phone": "1700506070",
+      "website": "https://pizzahut.co.il/",
+      "submittedAt": "2026-10-08T00:15:16.222Z",
+      "confirmations": 0,
+      "verified": false
+    },
+    {
+      "id": "c27",
+      "name": "בר בשרים",
+      "address": "נחל מאור 10",
+      "city": "בית שמש",
+      "type": "בשרי",
+      "hechsher": "הרב מחפוד",
+      "phone": "025869970",
+      "website": "https://meatbar.biz/",
+      "submittedAt": "2026-10-08T01:10:18.830Z",
+      "confirmations": 0,
+      "verified": false
+    },
+    {
+      "id": "c28",
+      "name": "פיצה ירושלים J10",
+      "address": "נחל מאור 8",
+      "city": "בית שמש",
+      "type": "חלבי",
+      "hechsher": "בד״ץ העדה״ח ירושלים",
+      "phone": "029999263",
+      "website": "https://pizzajerusalem10.maxshop.co.il/",
+      "submittedAt": "2026-10-08T01:12:42.921Z",
       "confirmations": 0,
       "verified": false
     }

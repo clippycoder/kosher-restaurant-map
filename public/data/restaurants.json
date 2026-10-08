@@ -1,17 +1,17 @@
 {
-  "generated": "2026-10-07T23:58:43.980Z",
+  "generated": "2026-10-08T01:14:35.869Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
-    "total": 646,
-    "mapped": 646,
+    "total": 650,
+    "mapped": 650,
     "unmapped": 0,
-    "community": 5
+    "community": 9
   },
   "facets": {
     "cities": [
       {
         "name": "ירושלים",
-        "count": 153,
+        "count": 154,
         "area": "ירושלים"
       },
       {
@@ -26,7 +26,7 @@
       },
       {
         "name": "בית שמש",
-        "count": 32,
+        "count": 34,
         "area": "מרכז"
       },
       {
@@ -90,6 +90,11 @@
         "area": "דרום"
       },
       {
+        "name": "ביתר עילית",
+        "count": 8,
+        "area": "ירושלים"
+      },
+      {
         "name": "חדרה",
         "count": 8,
         "area": "צפון"
@@ -103,11 +108,6 @@
         "name": "רמת גן",
         "count": 8,
         "area": "מרכז"
-      },
-      {
-        "name": "ביתר עילית",
-        "count": 7,
-        "area": "ירושלים"
       },
       {
         "name": "חיפה",
@@ -533,11 +533,11 @@
     "areas": [
       {
         "name": "מרכז",
-        "count": 229
+        "count": 231
       },
       {
         "name": "ירושלים",
-        "count": 195
+        "count": 197
       },
       {
         "name": "צפון",
@@ -563,11 +563,11 @@
       },
       {
         "name": "בד״ץ העדה״ח ירושלים",
-        "count": 41
+        "count": 43
       },
       {
         "name": "הרב מחפוד",
-        "count": 41
+        "count": 42
       },
       {
         "name": "הרב לנדא",
@@ -575,7 +575,7 @@
       },
       {
         "name": "הרב רובין",
-        "count": 30
+        "count": 31
       },
       {
         "name": "חוג חת״ס ב״ב",
@@ -609,11 +609,11 @@
     "types": [
       {
         "name": "חלבי",
-        "count": 342
+        "count": 345
       },
       {
         "name": "בשרי",
-        "count": 273
+        "count": 274
       },
       {
         "name": "פרווה",
@@ -3130,6 +3130,26 @@
       "precision": "address",
       "lat": 32.0857821,
       "lon": 34.8115037
+    },
+    {
+      "id": "c27",
+      "source": "community",
+      "name": "בר בשרים",
+      "address": "נחל מאור 10",
+      "cityRaw": "בית שמש",
+      "city": "בית שמש",
+      "area": "מרכז",
+      "kashrut": "הרב מחפוד",
+      "type": "בשרי",
+      "phone": "025869970",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-08T01:10:18.830Z",
+      "verified": false,
+      "website": "https://meatbar.biz/",
+      "precision": "address",
+      "lat": 31.7088357,
+      "lon": 35.0002688
     },
     {
       "id": 1585,
@@ -7330,6 +7350,26 @@
       "lon": 35.2191017
     },
     {
+      "id": "c26",
+      "source": "community",
+      "name": "פיצה האט",
+      "address": "הרב ברים 4",
+      "cityRaw": "ביתר עילית",
+      "city": "ביתר עילית",
+      "area": "ירושלים",
+      "kashrut": "הרב רובין",
+      "type": "חלבי",
+      "phone": "1700506070",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-08T00:15:16.222Z",
+      "verified": false,
+      "website": "https://pizzahut.co.il/",
+      "precision": "address",
+      "lat": 31.7043531,
+      "lon": 35.1166069
+    },
+    {
       "id": 1388,
       "name": "פיצה האט –  ראשון לציון – מערב",
       "address": "פיצה האט - ראשון לציון מערב, שדרות יוסף לישנסקי 6, ראשון לציון, ישראל",
@@ -8649,6 +8689,26 @@
       "precision": "address",
       "lat": 31.7891109,
       "lon": 35.2153891
+    },
+    {
+      "id": "c28",
+      "source": "community",
+      "name": "פיצה ירושלים J10",
+      "address": "נחל מאור 8",
+      "cityRaw": "בית שמש",
+      "city": "בית שמש",
+      "area": "מרכז",
+      "kashrut": "בד״ץ העדה״ח ירושלים",
+      "type": "חלבי",
+      "phone": "029999263",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-08T01:12:42.921Z",
+      "verified": false,
+      "website": "https://pizzajerusalem10.maxshop.co.il/",
+      "precision": "address",
+      "lat": 31.7089116,
+      "lon": 35.000924
     },
     {
       "id": "c4",
@@ -10503,6 +10563,25 @@
       "precision": "address",
       "lat": 32.023495,
       "lon": 34.770189
+    },
+    {
+      "id": "c25",
+      "source": "community",
+      "name": "קפה & טוסט",
+      "address": "בית ישראל 22",
+      "cityRaw": "ירושלים",
+      "city": "ירושלים",
+      "area": "ירושלים",
+      "kashrut": "בד״ץ העדה״ח ירושלים",
+      "type": "חלבי",
+      "phone": "",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-08T00:09:00.829Z",
+      "verified": false,
+      "precision": "address",
+      "lat": 31.789374,
+      "lon": 35.224521
     },
     {
       "id": 2321,
