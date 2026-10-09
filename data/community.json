@@ -1,5 +1,5 @@
 {
-  "fetched": "2026-10-08T10:05:40.573Z",
+  "fetched": "2026-10-09T10:07:47.190Z",
   "submissions": [
     {
       "id": "c1",
@@ -28,7 +28,7 @@
       "lat": 31.800909,
       "lon": 35.227713,
       "submittedAt": "2026-10-07T18:33:26.338Z",
-      "confirmations": 0,
+      "confirmations": 1,
       "verified": false
     },
     {
@@ -81,7 +81,7 @@
       "lat": 31.789374,
       "lon": 35.224521,
       "submittedAt": "2026-10-08T00:09:00.829Z",
-      "confirmations": 0,
+      "confirmations": 1,
       "verified": false
     },
     {
@@ -120,7 +120,7 @@
       "phone": "029999263",
       "website": "https://pizzajerusalem10.maxshop.co.il/",
       "submittedAt": "2026-10-08T01:12:42.921Z",
-      "confirmations": 1,
+      "confirmations": 2,
       "verified": false
     },
     {
@@ -133,6 +133,31 @@
       "phone": "0795912242",
       "website": "https://burgersbar.co.il/",
       "submittedAt": "2026-10-08T01:16:55.275Z",
+      "confirmations": 2,
+      "verified": false
+    },
+    {
+      "id": "c30",
+      "name": "מסעדת קיטשן",
+      "address": "שדרות ממילא 8",
+      "city": "ירושלים",
+      "type": "חלבי",
+      "hechsher": "רבנות ירושלים מהדרין",
+      "phone": "023750350",
+      "website": "https://kitchenm.co.il/",
+      "submittedAt": "2026-10-08T11:37:32.136Z",
+      "confirmations": 0,
+      "verified": false
+    },
+    {
+      "id": "c31",
+      "name": "נונא — מופלטה",
+      "address": "התות 3",
+      "city": "ירושלים",
+      "type": "חלבי",
+      "hechsher": "רבנות ירושלים מהדרין",
+      "phone": "025888333",
+      "submittedAt": "2026-10-08T13:26:24.315Z",
       "confirmations": 0,
       "verified": false
     }
@@ -159,6 +184,13 @@
         "acceptedAt": "2026-10-07T22:38:36.405Z"
       }
     },
+    "212": {
+      "type": {
+        "value": "בשרי",
+        "base": "",
+        "acceptedAt": "2026-10-08T20:10:48.163Z"
+      }
+    },
     "215": {
       "city": {
         "value": "טבריה",
@@ -166,11 +198,30 @@
         "acceptedAt": "2026-10-07T22:38:36.033Z"
       }
     },
+    "218": {
+      "type": {
+        "value": "בשרי",
+        "base": "",
+        "acceptedAt": "2026-10-08T20:10:52.090Z"
+      }
+    },
     "232": {
       "city": {
         "value": "ירושלים",
         "base": "",
         "acceptedAt": "2026-10-07T22:38:36.655Z"
+      }
+    },
+    "368": {
+      "hechsher": {
+        "value": "רבנות ירושלים מהדרין",
+        "base": "בית יוסף",
+        "acceptedAt": "2026-10-08T13:27:20.216Z"
+      },
+      "type": {
+        "value": "חלבי",
+        "base": "",
+        "acceptedAt": "2026-10-08T13:27:20.216Z"
       }
     },
     "450": {
@@ -199,6 +250,13 @@
         "value": "הרב רובין",
         "base": "רבנות ירושלים מהדרין",
         "acceptedAt": "2026-10-07T23:52:34.679Z"
+      }
+    },
+    "2160": {
+      "type": {
+        "value": "חלבי",
+        "base": "בשרי",
+        "acceptedAt": "2026-10-08T20:10:44.138Z"
       }
     },
     "2199": {
@@ -230,6 +288,13 @@
         "value": "ירושלים",
         "base": "",
         "acceptedAt": "2026-10-07T22:38:34.153Z"
+      }
+    },
+    "2265": {
+      "address": {
+        "value": "חלקת יהושוע 2",
+        "base": "רמת בית שמש | חלקת יהושוע 2",
+        "acceptedAt": "2026-10-08T20:43:34.299Z"
       }
     },
     "2584": {

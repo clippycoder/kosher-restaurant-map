@@ -1,17 +1,17 @@
 {
-  "generated": "2026-10-08T10:06:13.842Z",
+  "generated": "2026-10-09T10:08:01.143Z",
   "source": "https://rest.jdn.co.il",
   "counts": {
-    "total": 651,
-    "mapped": 651,
+    "total": 653,
+    "mapped": 653,
     "unmapped": 0,
-    "community": 10
+    "community": 12
   },
   "facets": {
     "cities": [
       {
         "name": "ירושלים",
-        "count": 154,
+        "count": 156,
         "area": "ירושלים"
       },
       {
@@ -537,7 +537,7 @@
       },
       {
         "name": "ירושלים",
-        "count": 197
+        "count": 199
       },
       {
         "name": "צפון",
@@ -555,7 +555,7 @@
     "hechsherim": [
       {
         "name": "בית יוסף",
-        "count": 265
+        "count": 264
       },
       {
         "name": "רבנות מהדרין",
@@ -583,7 +583,7 @@
       },
       {
         "name": "רבנות ירושלים מהדרין",
-        "count": 20
+        "count": 23
       },
       {
         "name": "קהילות",
@@ -609,11 +609,11 @@
     "types": [
       {
         "name": "חלבי",
-        "count": 345
+        "count": 349
       },
       {
         "name": "בשרי",
-        "count": 275
+        "count": 276
       },
       {
         "name": "פרווה",
@@ -2880,7 +2880,7 @@
     {
       "id": 2265,
       "name": "בורגרס בר – רמת בית שמש",
-      "address": "רמת בית שמש | חלקת יהושוע 2",
+      "address": "חלקת יהושוע 2",
       "cityRaw": "בית שמש",
       "area": "מרכז",
       "kashrut": "הרב מחפוד",
@@ -2890,9 +2890,15 @@
       "link": "https://rest.jdn.co.il/rest/2265/",
       "modified": "2023-01-15T13:25:14",
       "city": "בית שמש",
-      "precision": "city",
-      "lat": 31.746214,
-      "lon": 34.9886825
+      "upstream": {
+        "address": "רמת בית שמש | חלקת יהושוע 2"
+      },
+      "edited": [
+        "address"
+      ],
+      "precision": "address",
+      "lat": 31.7075563,
+      "lon": 34.996825
     },
     {
       "id": 2263,
@@ -4567,12 +4573,18 @@
       "cityRaw": "ירושלים",
       "area": "ירושלים",
       "kashrut": "הרב רובין",
-      "type": "בשרי",
+      "type": "חלבי",
       "phone": "02-6282813",
       "image": "https://rest.jdn.co.il/wp-content/uploads/2023/01/זיסלק.jpg",
       "link": "https://rest.jdn.co.il/rest/2160/",
       "modified": "2023-01-09T16:15:07",
       "city": "ירושלים",
+      "upstream": {
+        "type": "בשרי"
+      },
+      "edited": [
+        "type"
+      ],
       "precision": "street",
       "lat": 31.77548825,
       "lon": 35.2320854
@@ -5879,13 +5891,21 @@
       "address": "ממילא 8 , שדרות אלרוב ממילא, ירושלים",
       "cityRaw": "ירושלים",
       "area": "ירושלים",
-      "kashrut": "בית יוסף",
-      "type": "",
+      "kashrut": "רבנות ירושלים מהדרין",
+      "type": "חלבי",
       "phone": "02-5021000",
       "image": "",
       "link": "https://rest.jdn.co.il/rest/368/",
       "modified": "2022-09-19T11:27:19",
       "city": "ירושלים",
+      "upstream": {
+        "kashrut": "בית יוסף",
+        "type": ""
+      },
+      "edited": [
+        "hechsher",
+        "type"
+      ],
       "precision": "address",
       "lat": 31.7775815,
       "lon": 35.224416
@@ -6260,12 +6280,18 @@
       "cityRaw": "ירושלים",
       "area": "ירושלים",
       "kashrut": "בד״ץ העדה״ח ירושלים",
-      "type": "",
+      "type": "בשרי",
       "phone": "02-571-7002",
       "image": "https://rest.jdn.co.il/wp-content/uploads/2022/09/WhatsApp-Image-2018-05-06-at-20.48.48.jpeg",
       "link": "https://rest.jdn.co.il/rest/212/",
       "modified": "2022-09-19T15:12:04",
       "city": "ירושלים",
+      "upstream": {
+        "type": ""
+      },
+      "edited": [
+        "type"
+      ],
       "precision": "address",
       "lat": 31.8004584,
       "lon": 35.2123446
@@ -6544,6 +6570,26 @@
       "lon": 34.9899212
     },
     {
+      "id": "c30",
+      "source": "community",
+      "name": "מסעדת קיטשן",
+      "address": "שדרות ממילא 8",
+      "cityRaw": "ירושלים",
+      "city": "ירושלים",
+      "area": "ירושלים",
+      "kashrut": "רבנות ירושלים מהדרין",
+      "type": "חלבי",
+      "phone": "023750350",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-08T11:37:32.136Z",
+      "verified": false,
+      "website": "https://kitchenm.co.il/",
+      "precision": "address",
+      "lat": 31.7775815,
+      "lon": 35.224416
+    },
+    {
       "id": 383,
       "name": "מסעדת קמפניה",
       "address": "ברשבסקי 8,",
@@ -6780,6 +6826,25 @@
       "precision": "address",
       "lat": 32.0888207,
       "lon": 34.8223826
+    },
+    {
+      "id": "c31",
+      "source": "community",
+      "name": "נונא — מופלטה",
+      "address": "התות 3",
+      "cityRaw": "ירושלים",
+      "city": "ירושלים",
+      "area": "ירושלים",
+      "kashrut": "רבנות ירושלים מהדרין",
+      "type": "חלבי",
+      "phone": "025888333",
+      "image": "",
+      "link": "",
+      "modified": "2026-10-08T13:26:24.315Z",
+      "verified": false,
+      "precision": "address",
+      "lat": 31.7840758,
+      "lon": 35.2127541
     },
     {
       "id": 1460,
@@ -11591,12 +11656,18 @@
       "cityRaw": "ירושלים",
       "area": "ירושלים",
       "kashrut": "הרב רובין",
-      "type": "",
+      "type": "בשרי",
       "phone": "02-5815815",
       "image": "",
       "link": "https://rest.jdn.co.il/rest/218/",
       "modified": "2022-09-19T15:12:11",
       "city": "ירושלים",
+      "upstream": {
+        "type": ""
+      },
+      "edited": [
+        "type"
+      ],
       "precision": "address",
       "lat": 31.8007565,
       "lon": 35.2108129
